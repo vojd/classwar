@@ -32,7 +32,13 @@
                                         :preamble      ["react/react.min.js"]
                                         :externs       ["react/externs/react.js"]
                                         :optimizations :none
-                                        :pretty-print  true}}}}
+                                        :pretty-print  true}}
+                       :phone {:source-paths ["src/cljs"]
+                               :compiler {:output-to     "phone/www/js/app.gen.js"
+                                          :preamble      ["react/react.min.js"]
+                                          :externs       ["react/externs/react.js"]
+                                          :optimizations :simple
+                                          :pretty-print  true}}}}
 
   :profiles {:dev {:repl-options {:init-ns classwar.server
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
