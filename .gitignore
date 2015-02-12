@@ -12,7 +12,7 @@ pom.xml.asc
 /lib/
 
 classes/
-out/
+resources/public/js/
 
 /target/
 /checkouts
