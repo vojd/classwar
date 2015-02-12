@@ -51,14 +51,4 @@
 
                    :env {:is-dev true}
 
-                   :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]}}}}
-
-             :uberjar {:hooks [leiningen.cljsbuild]
-                       :env {:production true}
-                       :omit-source true
-                       :aot :all
-                       :cljsbuild {:builds {:app
-                                            {:source-paths ["env/prod/cljs"]
-                                             :compiler
-                                             {:optimizations :advanced
-                                              :pretty-print false}}}}}})
+                   :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]}}}}})
