@@ -50,5 +50,24 @@
   (update-in game [:grid (idx x y)] f))
 
 
+(def antifa-flyers {
+  :effort 2
+  :cost 20
+  :duration 5
+  :op (fn [g a]
+        ;; Do stuff each tic and return the new world
+        g)})
+
+(defn cost [op] (get op :cost 0))
+(defn effort [op] (get op :effort 0))
+
+(defn launch-operation [g x y op]
+  (let [new-op (merge op {
+                      :start (:time g)
+                      :pos [x y]})]
+    (-> g
+        (update-in [:activists] - (effort op))
+        (update-in [:money] - (cost op))
+        (update-in [:operations] conj new-op))))
 
 (def ACTIVIST_DAILY_DONATION 5)
