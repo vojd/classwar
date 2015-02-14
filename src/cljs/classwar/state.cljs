@@ -20,8 +20,8 @@
 (def GRID_WIDTH 16)
 (def GRID_HEIGHT 16)
 
-(def- initial-cell-state
-  {:facists 0.0})
+(defn- initial-cell-state []
+  {:facists (rand)})
 
 (defn initial-game-state []
   "Create the initial game state"
@@ -34,7 +34,7 @@
             :institutions             #{}  ;; Support groups and structures
             :operations               #{}} ;; Running operations
 
-            cells (repeat (* GRID_WIDTH GRID_HEIGHT) initial-cell-state)]
+        cells (repeatedly (* GRID_WIDTH GRID_HEIGHT) initial-cell-state)]
 
     (assoc gs :grid (vec cells))))
 
