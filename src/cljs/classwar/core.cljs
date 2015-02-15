@@ -1,32 +1,65 @@
+;; Copyright (C) 2015
+;; Anders Sundman <anders@4zm.org>
+;; Mathias Tervo <mathias.tervo@gmail.com>
+;;
+;; This program is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 (ns classwar.core
-  (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [classwar.world :as world]))
+  (:require    [cljs.core.async :refer [<!] :as async]
+               [om.core :as om :include-macros true]
+               [om.dom :as dom :include-macros true]
+               [big-bang.core :refer [big-bang!]]
+               [classwar.world :as world]
+               [classwar.render :as render]
+               [classwar.state :as state])
+
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 ;; defonce will help us prevent game state to reload whenever we refresh the browser
-(defonce game-state (atom (world/generate-world)))
+;;(defonce game-state (state/initial-game-state))
 
 (defn get-render-context [canvas-id]
   (let [canvas (.getElementById js/document canvas-id)]
     (.getContext canvas "2d")))
 
-(defn get-cell [world x y]
-  (let [width (-> @world :map :width)
+(defn get-cell [state x y]
+  (let [width (-> state :map :width)
         idx (+ x (* y width))]
-    (nth (-> @world :map :cells ) idx)))
+    (nth (-> state :map :cells ) idx)))
 
-(defn render-game-grid [world]
-  (let [w (vec (range (-> @world :map :width)))
-        h (vec (range (-> @world :map :height)))
-        cell-size (-> @world :map :cell-size)
-        ctx (get-render-context "canvas")]
-    (doseq [x w
-            y h]
-      (let [val (get-cell world x y)]
-        (set! (. ctx -fillStyle) (str "rgb(" (:val val) ", 0, 0"))
-        (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
-  world)
+
+(defn reset-timer [game]
+  (assoc-in game [:time] 1))
+
+(defn update-tick [game]
+  (update-in game [:time] inc))
+
+(defn update-game [event game]
+
+  (if (= 0 (mod (:time game) (:round-duration game)))
+    (-> game
+        (reset-timer))
+
+    ;; else
+    (update-tick game)))
 
 ;; called from index.html
 (defn main []
-  (render-game-grid game-state))
+  (go
+    (let [ctx (get-render-context "canvas")]
+
+      (big-bang!
+       :initial-state (state/initial-game-state)
+       :on-tick update-game
+       :to-draw (partial render/render ctx)))))
