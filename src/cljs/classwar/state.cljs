@@ -78,6 +78,17 @@
         expired-boons (filter expired-now? (:boons game))]
     (apply update-in game [:boons] disj expired-boons)))
 
+(defn- collect-boon [b game]
+  (-> game
+      (update-in [:activists] + (:recruitable b))
+      (update-in [:money] + (:money b))
+      (update-in [:boons] disj b)))
+
+(defn collect-boons [game x y]
+  (let [boons (filter (fn [b] (= [x y] (:pos b))) (:boons game))
+        collect-boon-fns (map (fn [b] (partial collect-boon b)) boons)]
+    ((apply comp collect-boon-fns) game)))
+
 (defn tic [game]
   "Advance the game state one tic - run the game logic"
   (-> game
