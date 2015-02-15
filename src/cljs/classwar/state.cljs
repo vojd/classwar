@@ -15,7 +15,8 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns classwar.state)
+(ns classwar.state
+  (:require [clojure.string :as str]))
 
 (def GRID_WIDTH 16)
 (def GRID_HEIGHT 16)
@@ -113,3 +114,14 @@
         (update-in [:operations] conj new-op))))
 
 (def ACTIVIST_DAILY_DONATION 5)
+
+(defn pprint-game [g]
+  (println "\nTime " (g :time) "  --  Game Overview")
+  (println "\n  Activists: " (g :activists) "  Money: " (g :money))
+  (println "\n  Operations:" (str/join ", " (map :id (g :operations))))
+  (println "\n  Boons:" (str/join ", " (g :boons))))
+
+(defn test-game [tics]
+  (let [g (initial-game-state)
+        gg (launch-operation g 0 0 antifa-flyers)]
+    (nth (map pprint-game (iterate tic gg)) tics)))
