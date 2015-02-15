@@ -41,22 +41,29 @@
 (defn- idx [x y] (+ x (* y GRID_WIDTH)))
 
 (defn get-cell [game x y]
-  ((:grid game) (idx x y)))
+  (get-in game [:grid (idx x y)]))
 
-(defn assoc-cell [game x y new-val]
-  (assoc-in game [:grid (idx x y)] new-val))
+(defn- bind-op [op]
+  (partial (:op op) op))
 
-(defn update-cell [game x y f]
-  (update-in game [:grid (idx x y)] f))
+(defn- execute-operations [game]
+  (let [op-fns (map bind-op (:operations game))]
+    ((apply comp op-fns) game)))
 
+(defn tic [game]
+  "Advance the game state one tic - run the game logic"
+  (-> game
+      (execute-operations)
+      (update-in [:time] inc)))
 
 (def antifa-flyers {
   :effort 2
   :cost 20
   :duration 5
-  :op (fn [g a]
-        ;; Do stuff each tic and return the new world
-        g)})
+  :op (fn [{[x y] :pos :as op} game]
+        (let [idx (idx x y)
+              facist-level-modifier-fn (fn [level] (max 0 (- level 0.1)))]
+          (update-in game [:grid idx :facists] facist-level-modifier-fn)))})
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
