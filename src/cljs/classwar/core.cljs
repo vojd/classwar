@@ -22,7 +22,8 @@
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
                [classwar.render :as render]
-               [classwar.state :as state])
+               [classwar.state :as state]
+               [classwar.ui :as ui])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
