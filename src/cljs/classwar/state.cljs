@@ -21,7 +21,7 @@
 (def GRID_HEIGHT 16)
 
 (defn- initial-cell-state []
-  {:facists (rand)})
+  {:fascists (rand)})
 
 (defn initial-game-state []
   "Create the initial game state"
@@ -62,8 +62,8 @@
   :duration 5
   :op (fn [{[x y] :pos :as op} game]
         (let [idx (idx x y)
-              facist-level-modifier-fn (fn [level] (max 0 (- level 0.1)))]
-          (update-in game [:grid idx :facists] facist-level-modifier-fn)))})
+              fascist-level-modifier-fn (fn [level] (max 0 (- level 0.1)))]
+          (update-in game [:grid idx :fascists] fascist-level-modifier-fn)))})
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
