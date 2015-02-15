@@ -67,11 +67,22 @@
         finish-op-fns (map (fn [op] (partial finish-n-reward op)) finishing-ops)]
     ((apply comp finish-op-fns) game)))
 
+(def BOON_DURATION 5)
+
+(defn- expired-boon? [time boon]
+  (>= (- time (:created boon)) BOON_DURATION))
+
+(defn- expire-boons [game]
+  (let [expired-now? (partial expired-boon? (:time game))
+        expired-boons (filter expired-now? (:boons game))]
+    (apply update-in game [:boons] disj expired-boons)))
+
 (defn tic [game]
   "Advance the game state one tic - run the game logic"
   (-> game
       (execute-operations)
       (finish-operations)
+      (expire-boons)
       (update-in [:time] inc)))
 
 (def antifa-flyers {
