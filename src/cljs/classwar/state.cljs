@@ -19,14 +19,19 @@
 
 (def GRID_WIDTH 16)
 (def GRID_HEIGHT 16)
+(def CELL-SIZE 80)
 
 (defn- initial-cell-state []
-  {:facists (rand)})
+  {:fascists (rand)})
 
 (defn initial-game-state []
   "Create the initial game state"
-  (let [gs {:time                       0  ;; Game time
+  (let [gs {:time                       1  ;; Game time
+            :round-duration             100 ;; Amounts of updates a round lasts
             :state                   :new  ;; :new :running :paused :game-over
+            :width GRID_WIDTH
+            :height GRID_HEIGHT
+            :cell-size CELL-SIZE
 
             :activists                  5  ;; Number of
             :money                    100  ;; $$
@@ -63,7 +68,7 @@
   :op (fn [{[x y] :pos :as op} game]
         (let [idx (idx x y)
               facist-level-modifier-fn (fn [level] (max 0 (- level 0.1)))]
-          (update-in game [:grid idx :facists] facist-level-modifier-fn)))})
+          (update-in game [:grid idx :fascists] facist-level-modifier-fn)))})
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
