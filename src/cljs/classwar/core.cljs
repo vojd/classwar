@@ -38,28 +38,30 @@
         idx (+ x (* y width))]
     (nth (-> state :map :cells ) idx)))
 
+(defn now [] (.getTime (js/Date.)))
 
-(defn reset-timer [game]
-  (assoc-in game [:time] 1))
+(defn update-game [game]
+  (state/pprint-game game)
+  (state/tic game))
 
-(defn update-tick [game]
-  (update-in game [:time] inc))
+(defn request-update [event {:keys [last-tic dt] :as game}]
+  (let [since-last (- (now) last-tic)
+        ticks (quot since-last dt)]
+    (if (> ticks 0)
+      ;; Tick away n times to catch up if nesseccary
+      (-> (nth (iterate update-game game) ticks)
+          (update-in [:last-tic] (partial + (* ticks dt))))
+      game)))
 
-(defn update-game [event game]
-
-  (if (= 0 (mod (:time game) (:round-duration game)))
-    (-> game
-        (reset-timer))
-
-    ;; else
-    (update-tick game)))
+(defn init-ui-state []
+  (merge {:dt 1000 :last-tic (now)}
+         (state/initial-game-state)))
 
 ;; called from index.html
 (defn main []
   (go
     (let [ctx (get-render-context "canvas")]
-
       (big-bang!
-       :initial-state (state/initial-game-state)
-       :on-tick update-game
+       :initial-state (init-ui-state)
+       :on-tick request-update
        :to-draw (partial render/render ctx)))))

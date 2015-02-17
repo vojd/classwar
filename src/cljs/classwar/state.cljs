@@ -132,10 +132,10 @@
 (def ACTIVIST_DAILY_DONATION 5)
 
 (defn pprint-game [g]
-  (println "\nTime " (g :time) "  --  Game Overview")
-  (println "\n  Activists: " (g :activists) "  Money: " (g :money))
-  (println "\n  Operations:" (str/join ", " (map :id (g :operations))))
-  (println "\n  Boons:" (str/join ", " (g :boons))))
+  (.log js/console "Time " (g :time) "  --  Game Overview")
+  (.log js/console " Activists: " (g :activists) "  Money: " (g :money))
+  (.log js/console " Operations:" (str/join ", " (map :id (g :operations))))
+  (.log js/console " Boons:" (str/join ", " (g :boons))))
 
 (defn test-game [tics]
   (let [g (initial-game-state)
