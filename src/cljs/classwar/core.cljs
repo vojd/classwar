@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.core
-  (:require    [cljs.core.async :refer [<!] :as async]
+  (:require    [cljs.core.async :as async]
                [om.core :as om :include-macros true]
                [om.dom :as dom :include-macros true]
                [big-bang.core :refer [big-bang!]]
@@ -57,6 +57,17 @@
   (merge {:dt 1000 :last-tic (now)}
          (state/initial-game-state)))
 
+
+(def cmd-chan (async/chan))
+
+(defn send-start-op []
+  ;; This is just for debugging - should be hooked up to ui
+  (async/put! cmd-chan :fu))
+
+(defn incomming-cmd [event world]
+  (.log js/console "incomming-cmd!")
+  (state/launch-operation world 0 0 state/antifa-flyers))
+
 ;; called from index.html
 (defn main []
   (go
@@ -64,4 +75,7 @@
       (big-bang!
        :initial-state (init-ui-state)
        :on-tick request-update
-       :to-draw (partial render/render ctx)))))
+       :to-draw (partial render/render ctx)
+       :on-receive incomming-cmd
+       :receive-channel cmd-chan
+       ))))
