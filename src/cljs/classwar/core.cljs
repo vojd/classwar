@@ -71,9 +71,19 @@
   (async/put! cmd-chan {:msg-id :collect-boon
                         :pos [x y]}))
 
+(defn send-start-game []
+  (async/put! cmd-chan {:msg-id :start-game}))
+(defn send-pause-game []
+  (async/put! cmd-chan {:msg-id :pause-game}))
+(defn send-resume-game []
+  (async/put! cmd-chan {:msg-id :resume-game}))
+
 (defn incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
   (condp = msg-id
+    :start-game (state/start world)
+    :pause-game (state/pause world)
+    :resume-game (state/resume world)
     :start-op
     (let [[x y] (:pos event)]
       (state/launch-operation world x y (:op event)))
