@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.core
-  (:require    [cljs.core.async :refer [<!] :as async]
+  (:require    [cljs.core.async :as async]
                [om.core :as om :include-macros true]
                [om.dom :as dom :include-macros true]
                [big-bang.core :refer [big-bang!]]
@@ -38,28 +38,67 @@
         idx (+ x (* y width))]
     (nth (-> state :map :cells ) idx)))
 
+(defn now [] (.getTime (js/Date.)))
 
-(defn reset-timer [game]
-  (assoc-in game [:time] 1))
+(defn update-game [game]
+  (state/pprint-game game)
+  (state/tic game))
 
-(defn update-tick [game]
-  (update-in game [:time] inc))
+(defn request-update [event {:keys [last-tic dt] :as game}]
+  (let [since-last (- (now) last-tic)
+        ticks (quot since-last dt)]
+    (if (> ticks 0)
+      ;; Tick away n times to catch up if nesseccary
+      (-> (nth (iterate update-game game) ticks)
+          (update-in [:last-tic] (partial + (* ticks dt))))
+      game)))
 
-(defn update-game [event game]
+(defn init-ui-state []
+  (merge {:dt 1000 :last-tic (now)}
+         (state/initial-game-state)))
 
-  (if (= 0 (mod (:time game) (:round-duration game)))
-    (-> game
-        (reset-timer))
 
-    ;; else
-    (update-tick game)))
+(def cmd-chan (async/chan))
+
+(defn send-start-antifa-op [x y]
+  ;; This is just for debugging - should be hooked up to ui
+  (async/put! cmd-chan {:msg-id :start-op
+                        :op state/antifa-flyers
+                        :pos [x y]}))
+
+(defn send-collect-boon [x y]
+  ;; This is just for debugging - should be hooked up to ui
+  (async/put! cmd-chan {:msg-id :collect-boon
+                        :pos [x y]}))
+
+(defn send-start-game []
+  (async/put! cmd-chan {:msg-id :start-game}))
+(defn send-pause-game []
+  (async/put! cmd-chan {:msg-id :pause-game}))
+(defn send-resume-game []
+  (async/put! cmd-chan {:msg-id :resume-game}))
+
+(defn incomming-cmd [{:keys [msg-id] :as event} world]
+  (.log js/console "incomming-cmd!")
+  (condp = msg-id
+    :start-game (state/start world)
+    :pause-game (state/pause world)
+    :resume-game (state/resume world)
+    :start-op
+    (let [[x y] (:pos event)]
+      (state/launch-operation world x y (:op event)))
+    :collect-boon
+    (let [[x y] (:pos event)]
+      (state/collect-boons world x y))))
 
 ;; called from index.html
 (defn main []
   (go
     (let [ctx (get-render-context "canvas")]
-
       (big-bang!
-       :initial-state (state/initial-game-state)
-       :on-tick update-game
-       :to-draw (partial render/render ctx)))))
+       :initial-state (init-ui-state)
+       :on-tick request-update
+       :to-draw (partial render/render ctx)
+       :on-receive incomming-cmd
+       :receive-channel cmd-chan
+       ))))
