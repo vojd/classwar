@@ -60,13 +60,26 @@
 
 (def cmd-chan (async/chan))
 
-(defn send-start-op []
+(defn send-start-antifa-op [x y]
   ;; This is just for debugging - should be hooked up to ui
-  (async/put! cmd-chan :fu))
+  (async/put! cmd-chan {:msg-id :start-op
+                        :op state/antifa-flyers
+                        :pos [x y]}))
 
-(defn incomming-cmd [event world]
+(defn send-collect-boon [x y]
+  ;; This is just for debugging - should be hooked up to ui
+  (async/put! cmd-chan {:msg-id :collect-boon
+                        :pos [x y]}))
+
+(defn incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
-  (state/launch-operation world 0 0 state/antifa-flyers))
+  (condp = msg-id
+    :start-op
+    (let [[x y] (:pos event)]
+      (state/launch-operation world x y (:op event)))
+    :collect-boon
+    (let [[x y] (:pos event)]
+      (state/collect-boons world x y))))
 
 ;; called from index.html
 (defn main []
