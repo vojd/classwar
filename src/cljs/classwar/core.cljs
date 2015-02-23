@@ -26,9 +26,6 @@
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-;; defonce will help us prevent game state to reload whenever we refresh the browser
-;;(defonce game-state (state/initial-game-state))
-
 (defn get-render-context [canvas-id]
   (let [canvas (.getElementById js/document canvas-id)]
     (.getContext canvas "2d")))
@@ -53,29 +50,31 @@
           (update-in [:last-tic] (partial + (* ticks dt))))
       game)))
 
-(defn init-ui-state []
-  (merge {:dt 1000 :last-tic (now)}
+(defn init-ui-state [chan]
+  (merge {:cmd-chan chan}
+         {:dt 1000 :last-tic (now)}
          (state/initial-game-state)))
 
+;; defonce will help us prevent game state to reload whenever we refresh the browser
+(defonce cmd-chan (async/chan))
+(defonce world (init-ui-state cmd-chan))
 
-(def cmd-chan (async/chan))
-
-(defn send-start-antifa-op [x y]
+(defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (async/put! cmd-chan {:msg-id :start-op
                         :op state/antifa-flyers
                         :pos [x y]}))
 
-(defn send-collect-boon [x y]
+(defn send-collect-boon! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (async/put! cmd-chan {:msg-id :collect-boon
                         :pos [x y]}))
 
-(defn send-start-game []
+(defn send-start-game! [cmd-chan]
   (async/put! cmd-chan {:msg-id :start-game}))
-(defn send-pause-game []
-  (async/put! cmd-chan {:msg-id :pause-game}))
-(defn send-resume-game []
+(defn send-pause-game [cmd-chan]
+  (async/put! cmd-chan! {:msg-id :pause-game}))
+(defn send-resume-game! [cmd-chan]
   (async/put! cmd-chan {:msg-id :resume-game}))
 
 (defn incomming-cmd [{:keys [msg-id] :as event} world]
@@ -96,9 +95,8 @@
   (go
     (let [ctx (get-render-context "canvas")]
       (big-bang!
-       :initial-state (init-ui-state)
+       :initial-state world
        :on-tick request-update
        :to-draw (partial render/render ctx)
        :on-receive incomming-cmd
-       :receive-channel cmd-chan
-       ))))
+       :receive-channel (:cmd-chan world)))))
