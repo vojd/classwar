@@ -90,8 +90,7 @@
     (let [[x y] (:pos event)]
       (state/collect-boons world x y))))
 
-;; called from index.html
-(defn main []
+(defn start-game []
   (go
     (let [ctx (get-render-context "canvas")]
       (big-bang!
@@ -100,3 +99,6 @@
        :to-draw (partial render/render ctx)
        :on-receive incomming-cmd
        :receive-channel (:cmd-chan world)))))
+
+;; called from index.html
+(defn main [])
