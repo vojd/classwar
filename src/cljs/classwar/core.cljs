@@ -22,7 +22,9 @@
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
                [classwar.render :as render]
-               [classwar.state :as state])
+               [classwar.state :as state]
+
+               [classwar.ui.stats :as ui-stats])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -102,3 +104,5 @@
 
 ;; called from index.html
 (defn main [])
+
+(start-game)

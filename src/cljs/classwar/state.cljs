@@ -25,6 +25,7 @@
 (defn- initial-cell-state []
   {:fascists (rand)})
 
+
 (defn initial-game-state []
   "Create the initial game state"
   (let [gs {:time                       1  ;; Game time

@@ -1,3 +1,48 @@
+body {
+    margin: 0;
+    padding: 0;
+    color: #ff0000;
+    background: #303030;
+}
+
+
 h1 {
   text-decoration: underline;
+}
+
+
+
+canvas #canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+#app {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 5;
+}
+
+
+.boon {
+    color: #fff;
+    background: #303030;
+    border: 1px solid #fff;
+    padding: 20px;
+    border-radius: 8px;
+
+}
+
+
+/* Stats */
+#stats {
+    position: relative;
+}
+
+/* Actions */
+#actions {
+    position: relative;
 }
