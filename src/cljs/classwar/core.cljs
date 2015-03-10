@@ -22,7 +22,8 @@
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
                [classwar.render :as render]
-               [classwar.state :as state])
+               [classwar.state :as state]
+               [classwar.chan :as channels])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -56,8 +57,8 @@
          (state/initial-game-state)))
 
 ;; defonce will help us prevent game state to reload whenever we refresh the browser
-(defonce cmd-chan (async/chan))
-(defonce world (init-ui-state cmd-chan))
+
+(defonce world (init-ui-state channels/cmd-chan))
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
