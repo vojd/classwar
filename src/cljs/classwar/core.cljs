@@ -23,7 +23,8 @@
                [classwar.world :as world]
                [classwar.render :as render]
                [classwar.state :as state]
-               [classwar.chan :as channels])
+               [classwar.channels :as channels]
+               [classwar.ui.play-ctrls :as fu])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -60,24 +61,6 @@
 
 (defonce world (init-ui-state channels/cmd-chan))
 
-(defn send-start-antifa-op! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (async/put! cmd-chan {:msg-id :start-op
-                        :op state/antifa-flyers
-                        :pos [x y]}))
-
-(defn send-collect-boon! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (async/put! cmd-chan {:msg-id :collect-boon
-                        :pos [x y]}))
-
-(defn send-start-game! [cmd-chan]
-  (async/put! cmd-chan {:msg-id :start-game}))
-(defn send-pause-game [cmd-chan]
-  (async/put! cmd-chan! {:msg-id :pause-game}))
-(defn send-resume-game! [cmd-chan]
-  (async/put! cmd-chan {:msg-id :resume-game}))
-
 (defn incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
   (condp = msg-id
@@ -102,4 +85,6 @@
        :receive-channel (:cmd-chan world)))))
 
 ;; called from index.html
-(defn main [])
+(defn main []
+  (start-game)
+  (.log js/console "in main" data))
