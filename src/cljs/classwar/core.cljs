@@ -39,16 +39,18 @@
 
 (defn now [] (.getTime (js/Date.)))
 
-(defn update-game [game]
+(defn update-game [game event-chan]
   (state/pprint-game game)
-  (state/tic game))
+  (let [new-game (state/tic game)]
+    (async/put! event-chan {:msg-id :tic :world new-game})
+    new-game))
 
 (defn request-update [event {:keys [last-tic dt] :as game}]
   (let [since-last (- (now) last-tic)
         ticks (quot since-last dt)]
     (if (> ticks 0)
       ;; Tick away n times to catch up if nesseccary
-      (-> (nth (iterate update-game game) ticks)
+      (-> (nth (iterate update-game game channels/event-chan) ticks)
           (update-in [:last-tic] (partial + (* ticks dt))))
       game)))
 
