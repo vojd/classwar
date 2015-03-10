@@ -22,7 +22,9 @@
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
                [classwar.render :as render]
-               [classwar.state :as state])
+               [classwar.state :as state]
+               [classwar.channels :as channels]
+               [classwar.ui.play-ctrls :as fu])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -37,16 +39,18 @@
 
 (defn now [] (.getTime (js/Date.)))
 
-(defn update-game [game]
+(defn update-game [game event-chan]
   (state/pprint-game game)
-  (state/tic game))
+  (let [new-game (state/tic game)]
+    (async/put! channels/event-chan {:msg-id :tic :world new-game})
+    new-game))
 
 (defn request-update [event {:keys [last-tic dt] :as game}]
   (let [since-last (- (now) last-tic)
         ticks (quot since-last dt)]
     (if (> ticks 0)
       ;; Tick away n times to catch up if nesseccary
-      (-> (nth (iterate update-game game) ticks)
+      (-> (nth (iterate update-game game channels/event-chan) ticks)
           (update-in [:last-tic] (partial + (* ticks dt))))
       game)))
 
@@ -56,26 +60,8 @@
          (state/initial-game-state)))
 
 ;; defonce will help us prevent game state to reload whenever we refresh the browser
-(defonce cmd-chan (async/chan))
-(defonce world (init-ui-state cmd-chan))
 
-(defn send-start-antifa-op! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (async/put! cmd-chan {:msg-id :start-op
-                        :op state/antifa-flyers
-                        :pos [x y]}))
-
-(defn send-collect-boon! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (async/put! cmd-chan {:msg-id :collect-boon
-                        :pos [x y]}))
-
-(defn send-start-game! [cmd-chan]
-  (async/put! cmd-chan {:msg-id :start-game}))
-(defn send-pause-game [cmd-chan]
-  (async/put! cmd-chan! {:msg-id :pause-game}))
-(defn send-resume-game! [cmd-chan]
-  (async/put! cmd-chan {:msg-id :resume-game}))
+(defonce world (init-ui-state channels/cmd-chan))
 
 (defn incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
@@ -101,4 +87,6 @@
        :receive-channel (:cmd-chan world)))))
 
 ;; called from index.html
-(defn main [])
+(defn main []
+  (start-game)
+  (.log js/console "in main" data))
