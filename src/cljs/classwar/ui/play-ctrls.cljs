@@ -41,17 +41,25 @@
             (let [w (<! channels/event-chan)]
               (om/transact! data :time
                             (fn [xs] (-> w :world :time)))
-              (recur))            )))
+              (recur)))))
     om/IRenderState
     (render-state [this _]
       (dom/div nil (:time data)))))
 
  (defn play-ctrls-view [data owner]
-    (.log js/console "data" data)
     (reify
       om/IRender
       (render [this]
         (dom/button #js { :onClick (partial send-start-game! channels/cmd-chan) } "Play"))))
+
+
+ (defn start-antifa-campaign-ctrl [data owner]
+    (reify
+      om/IRender
+      (render [this]
+        (dom/button
+         #js {:onClick (partial send-start-antifa-op! channels/cmd-chan 0 0)}
+         "Start antifa campaign"))))
 
 
 (om/root day-label-view ui-state
@@ -59,3 +67,6 @@
 
 (om/root play-ctrls-view ui-state
          {:target (. js/document (getElementById "play-ctrls"))})
+
+(om/root start-antifa-campaign-ctrl ui-state
+         {:target (. js/document (getElementById "start-antifa-campaign"))})
