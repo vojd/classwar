@@ -6,7 +6,8 @@
             [classwar.state :as state]
             [classwar.channels :as channels]))
 
-(defonce ui-state (atom {:boons [
+(defonce ui-state (atom {:time 0
+                         :boons [
                                  {:n "one" :x 100 :y 20}
                                  {:n "two" :x 200 :y 200}]}))
 
@@ -24,8 +25,10 @@
 (defn send-start-game! [cmd-chan]
   (.log js/console "in send start game" cmd-chan)
   (put! cmd-chan {:msg-id :start-game}))
+
 (defn send-pause-game [cmd-chan]
   (put! cmd-chan {:msg-id :pause-game}))
+
 (defn send-resume-game! [cmd-chan]
   (put! cmd-chan {:msg-id :resume-game}))
 
@@ -36,19 +39,19 @@
     (will-mount [_]
       (go (loop []
             (let [w (<! channels/event-chan)]
-              (.log js/console "world: " w)
-              (recur)))))
+              (om/transact! data :time
+                            (fn [xs] (-> w :world :time)))
+              (recur))            )))
+    om/IRenderState
+    (render-state [this _]
+      (dom/div nil (:time data)))))
 
-    om/IRender
-    (render [this]
-      (dom/div nil "World fu")))
-
-  (defn play-ctrls-view [data owner]
+ (defn play-ctrls-view [data owner]
     (.log js/console "data" data)
     (reify
       om/IRender
       (render [this]
-        (dom/button #js { :onClick (partial send-start-game! channels/cmd-chan) } "Play")))))
+        (dom/button #js { :onClick (partial send-start-game! channels/cmd-chan) } "Play"))))
 
 
 (om/root day-label-view ui-state

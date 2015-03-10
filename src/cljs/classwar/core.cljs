@@ -42,7 +42,7 @@
 (defn update-game [game event-chan]
   (state/pprint-game game)
   (let [new-game (state/tic game)]
-    (async/put! event-chan {:msg-id :tic :world new-game})
+    (async/put! channels/event-chan {:msg-id :tic :world new-game})
     new-game))
 
 (defn request-update [event {:keys [last-tic dt] :as game}]
