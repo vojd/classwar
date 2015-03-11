@@ -16,29 +16,13 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.core
-  (:require    [cljs.core.async :as async]
-               [om.core :as om :include-macros true]
-               [om.dom :as dom :include-macros true]
-               [classwar.world :as world]
-               [classwar.engine :as engine]
-               [classwar.render :as render]
-               [classwar.state :as state]
-               [classwar.channels :as channels]
-               [classwar.ui.play-ctrls :as fu])
-
-  (:require-macros [cljs.core.async.macros :refer [go]]))
-
-(defn get-render-context [canvas-id]
-  (let [canvas (.getElementById js/document canvas-id)]
-    (.getContext canvas "2d")))
-
-(defn get-cell [state x y]
-  (let [width (-> state :map :width)
-        idx (+ x (* y width))]
-    (nth (-> state :map :cells ) idx)))
+  (:require [classwar.engine :as engine]
+            [classwar.grid :as grid]
+            [classwar.channels :as channels]
+            [classwar.ui.play-ctrls :as fu]))
 
 (defn main []
-  (.log js/console "in main")
+  (.log js/console ">> Running main << ")
   (let [world (engine/init-engine-state channels/cmd-chan)
-        render-fn (partial render/render (get-render-context "canvas"))]
+        render-fn (partial grid/render (grid/get-render-context "canvas"))]
     (engine/start-game world render-fn)))

@@ -15,7 +15,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns classwar.render
+(ns classwar.grid
   (:require [classwar.state :as state]))
 
 (defn rgb-str [v]
@@ -35,3 +35,12 @@
 
 (defn render [ctx game]
   (render-grid ctx game))
+
+(defn get-render-context [canvas-id]
+  (let [canvas (.getElementById js/document canvas-id)]
+    (.getContext canvas "2d")))
+
+(defn get-cell [state x y]
+  (let [width (-> state :map :width)
+        idx (+ x (* y width))]
+    (nth (-> state :map :cells ) idx)))
