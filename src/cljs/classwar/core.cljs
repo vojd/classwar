@@ -23,6 +23,6 @@
 
 (defn main []
   (.log js/console ">> Running main << ")
-  (let [world (engine/init-engine-state channels/cmd-chan)
+  (let [world (engine/init-engine-state channels/cmd-chan channels/event-chan)
         render-fn (partial grid/render (grid/get-render-context "canvas"))]
     (engine/start-game world render-fn)))

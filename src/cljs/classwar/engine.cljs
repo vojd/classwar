@@ -28,15 +28,18 @@
 
 (defn now [] (.getTime (js/Date.)))
 
-(defn init-engine-state [chan]
-  (merge {:cmd-chan chan}
-         {:dt 1000 :last-tic (now)}
+(defn init-engine-state [cmd-chan event-chan]
+  (merge {:cmd-chan cmd-chan
+          :event-chan event-chan}
+         {:dt 1000
+          :last-tic (now)}
          (state/initial-game-state)))
 
 (defn update-game [game]
   (state/pprint-game game)
-  (let [new-game (state/tic game)]
-    (async/put! channels/event-chan {:msg-id :tic :world new-game})
+  (let [event-chan (:event-chan game)
+        new-game (state/tic game)]
+    (async/put! event-chan {:msg-id :tic :world new-game})
     new-game))
 
 (defn request-update [event {:keys [last-tic dt] :as game}]
