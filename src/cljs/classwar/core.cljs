@@ -19,8 +19,8 @@
   (:require    [cljs.core.async :as async]
                [om.core :as om :include-macros true]
                [om.dom :as dom :include-macros true]
-               [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
+               [classwar.engine :as engine]
                [classwar.render :as render]
                [classwar.state :as state]
                [classwar.channels :as channels]
@@ -37,56 +37,8 @@
         idx (+ x (* y width))]
     (nth (-> state :map :cells ) idx)))
 
-(defn now [] (.getTime (js/Date.)))
-
-(defn update-game [game event-chan]
-  (state/pprint-game game)
-  (let [new-game (state/tic game)]
-    (async/put! channels/event-chan {:msg-id :tic :world new-game})
-    new-game))
-
-(defn request-update [event {:keys [last-tic dt] :as game}]
-  (let [since-last (- (now) last-tic)
-        ticks (quot since-last dt)]
-    (if (> ticks 0)
-      ;; Tick away n times to catch up if nesseccary
-      (-> (nth (iterate update-game game channels/event-chan) ticks)
-          (update-in [:last-tic] (partial + (* ticks dt))))
-      game)))
-
-(defn init-ui-state [chan]
-  (merge {:cmd-chan chan}
-         {:dt 1000 :last-tic (now)}
-         (state/initial-game-state)))
-
-;; defonce will help us prevent game state to reload whenever we refresh the browser
-
-(defonce world (init-ui-state channels/cmd-chan))
-
-(defn incomming-cmd [{:keys [msg-id] :as event} world]
-  (.log js/console "incomming-cmd!")
-  (condp = msg-id
-    :start-game (state/start world)
-    :pause-game (state/pause world)
-    :resume-game (state/resume world)
-    :start-op
-    (let [[x y] (:pos event)]
-      (state/launch-operation world x y (:op event)))
-    :collect-boon
-    (let [[x y] (:pos event)]
-      (state/collect-boons world x y))))
-
-(defn start-game []
-  (go
-    (let [ctx (get-render-context "canvas")]
-      (big-bang!
-       :initial-state world
-       :on-tick request-update
-       :to-draw (partial render/render ctx)
-       :on-receive incomming-cmd
-       :receive-channel (:cmd-chan world)))))
-
-;; called from index.html
 (defn main []
-  (start-game)
-  (.log js/console "in main" data))
+  (.log js/console "in main")
+  (let [world (engine/init-engine-state channels/cmd-chan)
+        render-fn (partial render/render (get-render-context "canvas"))]
+    (engine/start-game world render-fn)))
