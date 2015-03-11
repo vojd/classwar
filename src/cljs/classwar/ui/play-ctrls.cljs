@@ -18,7 +18,6 @@
                         :pos [x y]}))
 
 (defn send-start-game! [cmd-chan]
-  (.log js/console "in send start game" cmd-chan)
   (put! cmd-chan {:msg-id :start-game}))
 
 (defn send-pause-game [cmd-chan]
