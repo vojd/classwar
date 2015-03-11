@@ -4,12 +4,7 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
             [classwar.state :as state]
-            [classwar.channels :as channels]))
-
-(defonce ui-state (atom {:time 0
-                         :boons [
-                                 {:n "one" :x 100 :y 20}
-                                 {:n "two" :x 200 :y 200}]}))
+            [classwar.ui.state :as ui-state]))
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
@@ -38,7 +33,7 @@
     om/IWillMount
     (will-mount [_]
       (go (loop []
-            (let [w (<! channels/event-chan)]
+            (let [w (<! (:event-chan @ui-state/ui-state))]
               (om/transact! data :time
                             (fn [xs] (-> w :world :time)))
               (recur)))))
@@ -50,7 +45,9 @@
     (reify
       om/IRender
       (render [this]
-        (dom/button #js { :onClick (partial send-start-game! channels/cmd-chan) } "Play"))))
+        (dom/button
+         #js { :onClick (partial send-start-game! (:cmd-chan @ui-state/ui-state)) }
+         "Play"))))
 
 
  (defn start-antifa-campaign-ctrl [data owner]
@@ -58,15 +55,14 @@
       om/IRender
       (render [this]
         (dom/button
-         #js {:onClick (partial send-start-antifa-op! channels/cmd-chan 0 0)}
+         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @ui-state/ui-state) 0 0)}
          "Start antifa campaign"))))
 
-
-(om/root day-label-view ui-state
+(om/root day-label-view ui-state/ui-state
          {:target (. js/document (getElementById "day-label"))})
 
-(om/root play-ctrls-view ui-state
+(om/root play-ctrls-view ui-state/ui-state
          {:target (. js/document (getElementById "play-ctrls"))})
 
-(om/root start-antifa-campaign-ctrl ui-state
+(om/root start-antifa-campaign-ctrl ui-state/ui-state
          {:target (. js/document (getElementById "start-antifa-campaign"))})

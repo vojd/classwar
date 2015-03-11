@@ -20,9 +20,7 @@
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world]
                [classwar.state :as state]
-               [classwar.channels :as channels]
-               [classwar.ui.play-ctrls :as fu]
-               )
+               [classwar.ui.play-ctrls :as fu])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
