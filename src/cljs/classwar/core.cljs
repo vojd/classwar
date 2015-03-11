@@ -17,8 +17,8 @@
 
 (ns classwar.core
   (:require [classwar.engine :as engine]
-            [classwar.grid :as grid]
             [classwar.channels :as channels]
+            [classwar.ui.grid :as grid]
             [classwar.ui.play-ctrls :as fu]))
 
 (defn main []

@@ -15,7 +15,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns classwar.grid
+(ns classwar.ui.grid
   (:require [classwar.state :as state]))
 
 (defn rgb-str [v]
