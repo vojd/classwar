@@ -18,7 +18,6 @@
 (ns classwar.engine
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
-               [classwar.world :as world]
                [classwar.state :as state]
                [classwar.ui.play-ctrls :as fu])
 
