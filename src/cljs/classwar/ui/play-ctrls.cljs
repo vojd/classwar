@@ -20,7 +20,7 @@
 (defn send-start-game! [cmd-chan]
   (put! cmd-chan {:msg-id :start-game}))
 
-(defn send-pause-game [cmd-chan]
+(defn send-pause-game! [cmd-chan]
   (put! cmd-chan {:msg-id :pause-game}))
 
 (defn send-resume-game! [cmd-chan]
@@ -40,13 +40,27 @@
     (render-state [this _]
       (dom/div nil (:time data)))))
 
- (defn play-ctrls-view [data owner]
-    (reify
-      om/IRender
-      (render [this]
+(defn- active-ctrl [{state :state}]
+  (case state
+    :new {:caption "Play" :action send-start-game!}
+    :running {:caption "Pause" :action send-pause-game!}
+    :paused {:caption "Resume" :action send-resume-game!}))
+
+(defn play-ctrls-view [data owner]
+  (reify
+    om/IWillMount
+    (will-mount [_]
+      (go (loop []
+            (let [w (<! (:event-chan @ui-state/ui-state))]
+              (om/transact! data :state
+                            (fn [xs] (-> w :world :state)))
+              (recur)))))
+    om/IRender
+    (render [this]
+      (let [{:keys [caption action]} (active-ctrl @ui-state/ui-state)]
         (dom/button
-         #js { :onClick (partial send-start-game! (:cmd-chan @ui-state/ui-state)) }
-         "Play"))))
+         #js { :onClick (partial action (:cmd-chan @ui-state/ui-state)) }
+         caption)))))
 
 
  (defn start-antifa-campaign-ctrl [data owner]
