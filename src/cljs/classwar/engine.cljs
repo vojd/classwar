@@ -18,8 +18,7 @@
 (ns classwar.engine
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
-               [classwar.state :as state]
-               [classwar.ui.play-ctrls :as fu])
+               [classwar.state :as state])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -56,6 +55,9 @@
     :collect-boon
     (let [[x y] (:pos event)]
       (state/collect-boons world x y))))
+
+(def cmd-chan (async/chan))
+(def game (init-engine-state cmd-chan))
 
 (defn start-game [world render-fn]
   (go
