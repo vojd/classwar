@@ -26,26 +26,24 @@
 
 (defn init-engine-state [cmd-chan]
   (merge {:cmd-chan cmd-chan}
-         {:dt 1000
-          :last-tic (now)}
          (state/initial-game-state)))
 
-(defn update-game [game]
+(defn- update-game [game]
   (state/pprint-game game)
   (state/tic game))
 
-(defn request-update [_ {:keys [last-tic dt] :as game}]
-  (let [since-last (- (now) last-tic)
-        ticks (quot since-last dt)]
-    (if (> ticks 0)
-      ;; Tick away n times to catch up if nesseccary
-      (-> (nth (iterate update-game game) ticks)
-          (update-in [:last-tic] (partial + (* ticks dt))))
-      game)))
+(defn- send-tick! [cmd-chan]
+  (async/put! cmd-chan {:msg-id :tick}))
 
-(defn incomming-cmd [{:keys [msg-id] :as event} world]
+(defn start-ticker [cmd-chan period]
+  (go (while true
+        (send-tick! cmd-chan)
+        (<! (async/timeout period)))))
+
+(defn- incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
   (condp = msg-id
+    :tick (update-game world)
     :start-game (state/start world)
     :pause-game (state/pause world)
     :resume-game (state/resume world)
@@ -63,7 +61,7 @@
   (go
     (big-bang!
      :initial-state world
-     :on-tick request-update
      :to-draw render-fn
      :on-receive incomming-cmd
-     :receive-channel (:cmd-chan world))))
+     :receive-channel (:cmd-chan world))
+    (start-ticker (:cmd-chan world) 1000)))
