@@ -43,19 +43,20 @@
 (defn- incomming-cmd [{:keys [msg-id] :as event} world]
   (.log js/console "incomming-cmd!")
   (condp = msg-id
-    :tick (update-game world)
-    :start-game (state/start world)
-    :pause-game (state/pause world)
-    :resume-game (state/resume world)
+    :tick (swap! world update-game)
+    :start-game (swap! world state/start)
+    :pause-game (swap! world state/pause)
+    :resume-game (swap! world state/resume)
     :start-op
     (let [[x y] (:pos event)]
-      (state/launch-operation world x y (:op event)))
+      (swap! world state/launch-operation x y (:op event)))
     :collect-boon
     (let [[x y] (:pos event)]
-      (state/collect-boons world x y))))
+      (swap! world state/collect-boons x y)))
+  world)
 
 (def cmd-chan (async/chan))
-(def game (init-engine-state cmd-chan))
+(def game (atom (init-engine-state cmd-chan)))
 
 (defn start-game [world render-fn]
   (go
@@ -63,5 +64,5 @@
      :initial-state world
      :to-draw render-fn
      :on-receive incomming-cmd
-     :receive-channel (:cmd-chan world))
-    (start-ticker (:cmd-chan world) 1000)))
+     :receive-channel (:cmd-chan @world))
+    (start-ticker (:cmd-chan @world) 1000)))

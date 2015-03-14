@@ -3,6 +3,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
+            [classwar.engine :as engine]
             [classwar.state :as state]
             [classwar.ui.state :as ui-state]))
 
@@ -49,7 +50,7 @@
          #js {:onClick (partial send-start-antifa-op! (:cmd-chan @ui-state/ui-state) 0 0)}
          "Start antifa campaign"))))
 
-(om/root day-label-view ui-state/ui-state
+(om/root day-label-view engine/game
          {:target (. js/document (getElementById "day-label"))})
 
 (om/root play-ctrls-view ui-state/ui-state

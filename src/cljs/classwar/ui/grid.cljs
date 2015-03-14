@@ -34,7 +34,7 @@
   state)
 
 (defn render [ctx game]
-  (render-grid ctx game))
+  (render-grid ctx @game))
 
 (defn get-render-context [canvas-id]
   (let [canvas (.getElementById js/document canvas-id)]
