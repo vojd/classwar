@@ -20,7 +20,7 @@
 (defn send-start-game! [cmd-chan]
   (put! cmd-chan {:msg-id :start-game}))
 
-(defn send-pause-game [cmd-chan]
+(defn send-pause-game! [cmd-chan]
   (put! cmd-chan {:msg-id :pause-game}))
 
 (defn send-resume-game! [cmd-chan]
