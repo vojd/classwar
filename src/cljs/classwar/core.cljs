@@ -25,9 +25,7 @@
 (defn main []
   (.log js/console ">> Running main << ")
   (let [cmd-chan (async/chan)
-        event-chan (async/chan)
-        world (engine/init-engine-state cmd-chan event-chan)
+        world (engine/init-engine-state cmd-chan)
         render-fn (partial grid/render (grid/get-render-context "canvas"))]
     (swap! ui-state/ui-state assoc :cmd-chan cmd-chan)
-    (swap! ui-state/ui-state assoc :event-chan event-chan)
     (engine/start-game world render-fn)))

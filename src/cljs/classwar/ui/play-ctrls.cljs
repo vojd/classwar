@@ -27,15 +27,7 @@
   (put! cmd-chan {:msg-id :resume-game}))
 
 (defn day-label-view [data owner]
-
   (reify
-    om/IWillMount
-    (will-mount [_]
-      (go (loop []
-            (let [w (<! (:event-chan @ui-state/ui-state))]
-              (om/transact! data :time
-                            (fn [xs] (-> w :world :time)))
-              (recur)))))
     om/IRenderState
     (render-state [this _]
       (dom/div nil (:time data)))))
