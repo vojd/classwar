@@ -32,13 +32,23 @@
     (render-state [this _]
       (dom/div nil (:time data)))))
 
- (defn play-ctrls-view [data owner]
-    (reify
-      om/IRender
-      (render [this]
+(defmulti play-ctrl :state)
+(defmethod play-ctrl :new [_]
+  {:caption "Play" :ctrl-op send-start-game!})
+(defmethod play-ctrl :running [_]
+  {:caption "Pause" :ctrl-op send-pause-game!})
+(defmethod play-ctrl :paused [_]
+  {:caption "Resume" :ctrl-op send-resume-game!})
+
+(defn play-ctrls-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [{cmd-chan :cmd-chan} data
+            {:keys [caption ctrl-op]} (play-ctrl data)]
         (dom/button
-         #js { :onClick (partial send-start-game! (:cmd-chan @engine/game)) }
-         "Play"))))
+         #js { :onClick (partial ctrl-op cmd-chan) }
+         caption)))))
 
 
  (defn start-antifa-campaign-ctrl [data owner]
