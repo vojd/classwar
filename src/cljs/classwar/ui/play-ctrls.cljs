@@ -4,8 +4,7 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
             [classwar.engine :as engine]
-            [classwar.state :as state]
-            [classwar.ui.state :as ui-state]))
+            [classwar.state :as state]))
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
@@ -38,7 +37,7 @@
       om/IRender
       (render [this]
         (dom/button
-         #js { :onClick (partial send-start-game! (:cmd-chan @ui-state/ui-state)) }
+         #js { :onClick (partial send-start-game! (:cmd-chan @engine/game)) }
          "Play"))))
 
 
@@ -47,14 +46,14 @@
       om/IRender
       (render [this]
         (dom/button
-         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @ui-state/ui-state) 0 0)}
+         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @engine/game) 0 0)}
          "Start antifa campaign"))))
 
 (om/root day-label-view engine/game
          {:target (. js/document (getElementById "day-label"))})
 
-(om/root play-ctrls-view ui-state/ui-state
+(om/root play-ctrls-view engine/game
          {:target (. js/document (getElementById "play-ctrls"))})
 
-(om/root start-antifa-campaign-ctrl ui-state/ui-state
+(om/root start-antifa-campaign-ctrl engine/game
          {:target (. js/document (getElementById "start-antifa-campaign"))})
