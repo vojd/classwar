@@ -40,19 +40,27 @@
         (send-tick! cmd-chan)
         (<! (async/timeout period)))))
 
-(defn- incomming-cmd [{:keys [msg-id] :as event} world]
-  (.log js/console "incomming-cmd!")
-  (condp = msg-id
-    :tick (swap! world update-game)
-    :start-game (swap! world state/start)
-    :pause-game (swap! world state/pause)
-    :resume-game (swap! world state/resume)
-    :start-op
-    (let [[x y] (:pos event)]
-      (swap! world state/launch-operation x y (:op event)))
-    :collect-boon
-    (let [[x y] (:pos event)]
-      (swap! world state/collect-boons x y)))
+(defmulti process-cmd :msg-id)
+(defmethod process-cmd :tick [cmd world]
+  (update-game world))
+
+(defmethod process-cmd :start-game [cmd world]
+  (state/start world))
+(defmethod process-cmd :pause-game [cmd world]
+  (state/pause world))
+(defmethod process-cmd :resume-game [cmd world]
+  (state/resume world))
+
+(defmethod process-cmd :start-op [cmd world]
+  (let [{[x y] :pos} cmd]
+    (state/launch-operation world x y (:op cmd))))
+
+(defmethod process-cmd :collect-boon [cmd world]
+  (let [{[x y] :pos} cmd]
+    (state/collect-boons world x y)))
+
+(defn incomming-cmd [cmd world]
+  (swap! world #(process-cmd cmd %))
   world)
 
 (def cmd-chan (async/chan))
