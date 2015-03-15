@@ -18,16 +18,10 @@
 (ns classwar.core
   (:require [cljs.core.async :as async]
             [classwar.engine :as engine]
-            [classwar.ui.state :as ui-state]
             [classwar.ui.grid :as grid]
-            [classwar.ui.play-ctrls :as fu]))
+            [classwar.ui.play-ctrls]))
 
 (defn main []
   (.log js/console ">> Running main << ")
-  (let [cmd-chan (async/chan)
-        event-chan (async/chan)
-        world (engine/init-engine-state cmd-chan event-chan)
-        render-fn (partial grid/render (grid/get-render-context "canvas"))]
-    (swap! ui-state/ui-state assoc :cmd-chan cmd-chan)
-    (swap! ui-state/ui-state assoc :event-chan event-chan)
-    (engine/start-game world render-fn)))
+  (let [render-fn (partial grid/render (grid/get-render-context "canvas"))]
+    (engine/start-game engine/game render-fn)))

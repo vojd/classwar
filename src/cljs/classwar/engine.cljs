@@ -18,54 +18,59 @@
 (ns classwar.engine
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
-               [classwar.state :as state]
-               [classwar.ui.play-ctrls :as fu])
+               [classwar.state :as state])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn now [] (.getTime (js/Date.)))
 
-(defn init-engine-state [cmd-chan event-chan]
-  (merge {:cmd-chan cmd-chan
-          :event-chan event-chan}
-         {:dt 1000
-          :last-tic (now)}
+(defn init-engine-state [cmd-chan]
+  (merge {:cmd-chan cmd-chan}
          (state/initial-game-state)))
 
-(defn update-game [game]
+(defn- update-game [game]
   (state/pprint-game game)
-  (let [event-chan (:event-chan game)
-        new-game (state/tic game)]
-    (async/put! event-chan {:msg-id :tic :world new-game})
-    new-game))
+  (state/tic game))
 
-(defn request-update [event {:keys [last-tic dt] :as game}]
-  (let [since-last (- (now) last-tic)
-        ticks (quot since-last dt)]
-    (if (> ticks 0)
-      ;; Tick away n times to catch up if nesseccary
-      (-> (nth (iterate update-game game) ticks)
-          (update-in [:last-tic] (partial + (* ticks dt))))
-      game)))
+(defn- send-tick! [cmd-chan]
+  (async/put! cmd-chan {:msg-id :tick}))
 
-(defn incomming-cmd [{:keys [msg-id] :as event} world]
-  (.log js/console "incomming-cmd!")
-  (condp = msg-id
-    :start-game (state/start world)
-    :pause-game (state/pause world)
-    :resume-game (state/resume world)
-    :start-op
-    (let [[x y] (:pos event)]
-      (state/launch-operation world x y (:op event)))
-    :collect-boon
-    (let [[x y] (:pos event)]
-      (state/collect-boons world x y))))
+(defn start-ticker [cmd-chan period]
+  (go (while true
+        (send-tick! cmd-chan)
+        (<! (async/timeout period)))))
+
+(defmulti process-cmd :msg-id)
+(defmethod process-cmd :tick [cmd world]
+  (update-game world))
+
+(defmethod process-cmd :start-game [cmd world]
+  (state/start world))
+(defmethod process-cmd :pause-game [cmd world]
+  (state/pause world))
+(defmethod process-cmd :resume-game [cmd world]
+  (state/resume world))
+
+(defmethod process-cmd :start-op [cmd world]
+  (let [{[x y] :pos} cmd]
+    (state/launch-operation world x y (:op cmd))))
+
+(defmethod process-cmd :collect-boon [cmd world]
+  (let [{[x y] :pos} cmd]
+    (state/collect-boons world x y)))
+
+(defn incomming-cmd [cmd world]
+  (swap! world #(process-cmd cmd %))
+  world)
+
+(def cmd-chan (async/chan))
+(def game (atom (init-engine-state cmd-chan)))
 
 (defn start-game [world render-fn]
   (go
     (big-bang!
      :initial-state world
-     :on-tick request-update
      :to-draw render-fn
      :on-receive incomming-cmd
-     :receive-channel (:cmd-chan world))))
+     :receive-channel (:cmd-chan @world))
+    (start-ticker (:cmd-chan @world) 1000)))

@@ -3,8 +3,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
-            [classwar.state :as state]
-            [classwar.ui.state :as ui-state]))
+            [classwar.engine :as engine]
+            [classwar.state :as state]))
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
@@ -20,33 +20,35 @@
 (defn send-start-game! [cmd-chan]
   (put! cmd-chan {:msg-id :start-game}))
 
-(defn send-pause-game [cmd-chan]
+(defn send-pause-game! [cmd-chan]
   (put! cmd-chan {:msg-id :pause-game}))
 
 (defn send-resume-game! [cmd-chan]
   (put! cmd-chan {:msg-id :resume-game}))
 
 (defn day-label-view [data owner]
-
   (reify
-    om/IWillMount
-    (will-mount [_]
-      (go (loop []
-            (let [w (<! (:event-chan @ui-state/ui-state))]
-              (om/transact! data :time
-                            (fn [xs] (-> w :world :time)))
-              (recur)))))
     om/IRenderState
     (render-state [this _]
       (dom/div nil (:time data)))))
 
- (defn play-ctrls-view [data owner]
-    (reify
-      om/IRender
-      (render [this]
+(defmulti play-ctrl :state)
+(defmethod play-ctrl :new [_]
+  {:caption "Play" :ctrl-op send-start-game!})
+(defmethod play-ctrl :running [_]
+  {:caption "Pause" :ctrl-op send-pause-game!})
+(defmethod play-ctrl :paused [_]
+  {:caption "Resume" :ctrl-op send-resume-game!})
+
+(defn play-ctrls-view [data owner]
+  (reify
+    om/IRender
+    (render [this]
+      (let [{cmd-chan :cmd-chan} data
+            {:keys [caption ctrl-op]} (play-ctrl data)]
         (dom/button
-         #js { :onClick (partial send-start-game! (:cmd-chan @ui-state/ui-state)) }
-         "Play"))))
+         #js { :onClick (partial ctrl-op cmd-chan) }
+         caption)))))
 
 
  (defn start-antifa-campaign-ctrl [data owner]
@@ -54,14 +56,14 @@
       om/IRender
       (render [this]
         (dom/button
-         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @ui-state/ui-state) 0 0)}
+         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @engine/game) 0 0)}
          "Start antifa campaign"))))
 
-(om/root day-label-view ui-state/ui-state
+(om/root day-label-view engine/game
          {:target (. js/document (getElementById "day-label"))})
 
-(om/root play-ctrls-view ui-state/ui-state
+(om/root play-ctrls-view engine/game
          {:target (. js/document (getElementById "play-ctrls"))})
 
-(om/root start-antifa-campaign-ctrl ui-state/ui-state
+(om/root start-antifa-campaign-ctrl engine/game
          {:target (. js/document (getElementById "start-antifa-campaign"))})
