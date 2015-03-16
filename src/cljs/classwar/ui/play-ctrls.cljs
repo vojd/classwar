@@ -4,12 +4,12 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
             [classwar.engine :as engine]
-            [classwar.state :as state]))
+            [classwar.world :as world]))
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (put! cmd-chan {:msg-id :start-op
-                        :op state/antifa-flyers
+                        :op world/antifa-flyers
                         :pos [x y]}))
 
 (defn send-collect-boon! [cmd-chan x y]

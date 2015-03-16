@@ -15,7 +15,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns classwar.state
+(ns classwar.world
   (:require [clojure.string :as str]))
 
 (def GRID_WIDTH 16)
@@ -25,8 +25,8 @@
 (defn- initial-cell-state []
   {:fascists (rand)})
 
-(defn initial-game-state []
-  "Create the initial game state"
+(defn create-world-state []
+  "Create the initial game world"
   (let [gs {:time                       1  ;; Game time
             :state                   :new  ;; :new :running :paused :game-over
             :width GRID_WIDTH

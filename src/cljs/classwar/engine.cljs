@@ -18,19 +18,15 @@
 (ns classwar.engine
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
-               [classwar.state :as state])
+               [classwar.world :as world])
 
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn now [] (.getTime (js/Date.)))
 
-(defn init-engine-state [cmd-chan]
-  (merge {:cmd-chan cmd-chan}
-         (state/initial-game-state)))
-
 (defn- update-game [game]
-  (state/pprint-game game)
-  (state/tic game))
+  (world/pprint-game game)
+  (world/tic game))
 
 (defn- send-tick! [cmd-chan]
   (async/put! cmd-chan {:msg-id :tick}))
@@ -41,36 +37,40 @@
         (<! (async/timeout period)))))
 
 (defmulti process-cmd :msg-id)
-(defmethod process-cmd :tick [cmd world]
-  (update-game world))
+(defmethod process-cmd :tick [cmd game]
+  (update-game game))
 
-(defmethod process-cmd :start-game [cmd world]
-  (state/start world))
-(defmethod process-cmd :pause-game [cmd world]
-  (state/pause world))
-(defmethod process-cmd :resume-game [cmd world]
-  (state/resume world))
+(defmethod process-cmd :start-game [cmd game]
+  (world/start game))
+(defmethod process-cmd :pause-game [cmd game]
+  (world/pause game))
+(defmethod process-cmd :resume-game [cmd game]
+  (world/resume game))
 
-(defmethod process-cmd :start-op [cmd world]
+(defmethod process-cmd :start-op [cmd game]
   (let [{[x y] :pos} cmd]
-    (state/launch-operation world x y (:op cmd))))
+    (world/launch-operation game x y (:op cmd))))
 
-(defmethod process-cmd :collect-boon [cmd world]
+(defmethod process-cmd :collect-boon [cmd game]
   (let [{[x y] :pos} cmd]
-    (state/collect-boons world x y)))
+    (world/collect-boons game x y)))
 
-(defn incomming-cmd [cmd world]
-  (swap! world #(process-cmd cmd %))
-  world)
+(defn incomming-cmd [cmd game]
+  (swap! game #(process-cmd cmd %))
+  game)
+
+(defn create-game-state [cmd-chan]
+  (merge {:cmd-chan cmd-chan}
+         (world/create-world-state)))
 
 (def cmd-chan (async/chan))
-(def game (atom (init-engine-state cmd-chan)))
+(def game (atom (create-game-state cmd-chan)))
 
-(defn start-game [world render-fn]
+(defn start-game [game render-fn]
   (go
     (big-bang!
-     :initial-state world
+     :initial-state game
      :to-draw render-fn
      :on-receive incomming-cmd
-     :receive-channel (:cmd-chan @world))
-    (start-ticker (:cmd-chan @world) 1000)))
+     :receive-channel (:cmd-chan @game))
+    (start-ticker (:cmd-chan @game) 1000)))
