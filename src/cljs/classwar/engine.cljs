@@ -25,7 +25,7 @@
 (defn now [] (.getTime (js/Date.)))
 
 (defn- update-game [game]
-  (world/pprint-game game)
+  (world/pprint-world game)
   (world/tic game))
 
 (defn- send-tick! [cmd-chan]

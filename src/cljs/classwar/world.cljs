@@ -53,74 +53,74 @@
 
 (defn- idx [x y] (+ x (* y GRID_WIDTH)))
 
-(defn get-cell [game x y]
-  (get-in game [:grid (idx x y)]))
+(defn get-cell [world x y]
+  (get-in world [:grid (idx x y)]))
 
 (defn- bind-op [op]
   (partial (:op op) op))
 
-(defn- execute-operations [game]
-  (let [op-fns (map bind-op (:operations game))]
-    ((apply comp op-fns) game)))
+(defn- execute-operations [world]
+  (let [op-fns (map bind-op (:operations world))]
+    ((apply comp op-fns) world)))
 
 (defn- finished-op? [time op]
   (>= (- time (:start op)) (:duration op)))
 
-(defn- finish-n-reward [op game]
-  (let [boon ((:boon op) op game)]
-    (-> game
+(defn- finish-n-reward [op world]
+  (let [boon ((:boon op) op world)]
+    (-> world
         (update-in [:activists] + (:effort op))
         (update-in [:operations] disj op)
         (update-in [:boons] conj boon))))
 
-(defn- finish-operations [game]
-  (let [finished-now? (partial finished-op? (:time game))
-        finishing-ops (filter finished-now? (:operations game))
+(defn- finish-operations [world]
+  (let [finished-now? (partial finished-op? (:time world))
+        finishing-ops (filter finished-now? (:operations world))
         finish-op-fns (map (fn [op] (partial finish-n-reward op)) finishing-ops)]
-    ((apply comp finish-op-fns) game)))
+    ((apply comp finish-op-fns) world)))
 
 (def BOON_DURATION 5)
 
 (defn- expired-boon? [time boon]
   (>= (- time (:created boon)) BOON_DURATION))
 
-(defn- expire-boons [game]
-  (let [expired-now? (partial expired-boon? (:time game))
-        expired-boons (filter expired-now? (:boons game))]
-    (apply update-in game [:boons] disj expired-boons)))
+(defn- expire-boons [world]
+  (let [expired-now? (partial expired-boon? (:time world))
+        expired-boons (filter expired-now? (:boons world))]
+    (apply update-in world [:boons] disj expired-boons)))
 
-(defn- collect-boon [b game]
-  (-> game
+(defn- collect-boon [b world]
+  (-> world
       (update-in [:activists] + (:recruitable b))
       (update-in [:money] + (:money b))
       (update-in [:boons] disj b)))
 
-(defn collect-boons [game x y]
-  (let [boons (filter (fn [b] (= [x y] (:pos b))) (:boons game))
+(defn collect-boons [world x y]
+  (let [boons (filter (fn [b] (= [x y] (:pos b))) (:boons world))
         collect-boon-fns (map (fn [b] (partial collect-boon b)) boons)]
-    ((apply comp collect-boon-fns) game)))
+    ((apply comp collect-boon-fns) world)))
 
-(defn tic [game]
-  "Advance the game state one tic - run the game logic"
-  (if (= (:state game) :running)
-    (-> game
+(defn tic [world]
+  "Advance the world state one tic - run the world logic"
+  (if (= (:state world) :running)
+    (-> world
         (execute-operations)
         (finish-operations)
         (expire-boons)
         (update-in [:time] inc))
-    game))
+    world))
 
 (def antifa-flyers {
   :id :antifa-flyers
   :effort 2
   :cost 20
   :duration 5
-  :op (fn [{[x y] :pos :as op} game]
+  :op (fn [{[x y] :pos :as op} world]
         (let [idx (idx x y)
               fascist-level-modifier-fn (fn [level] (max 0 (- level 0.1)))]
-          (update-in game [:grid idx :fascists] fascist-level-modifier-fn)))
-  :boon (fn [{pos :pos :as op} game] {
-          :created (:time game)
+          (update-in world [:grid idx :fascists] fascist-level-modifier-fn)))
+  :boon (fn [{pos :pos :as op} world] {
+          :created (:time world)
           :pos pos
           :recruitable 1
           :money 0})})
@@ -139,13 +139,8 @@
 
 (def ACTIVIST_DAILY_DONATION 5)
 
-(defn pprint-game [g]
-  (.log js/console "Time " (g :time) "  --  Game Overview  --  State: " (str (g :state)))
-  (.log js/console " Activists: " (g :activists) "  Money: " (g :money))
-  (.log js/console " Operations:" (str/join ", " (map :id (g :operations))))
-  (.log js/console " Boons:" (str/join ", " (g :boons))))
-
-(defn test-game [tics]
-  (let [g (initial-game-state)
-        gg (launch-operation g 0 0 antifa-flyers)]
-    (nth (map pprint-game (iterate tic gg)) tics)))
+(defn pprint-world [w]
+  (.log js/console "Time " (w :time) "  --  Game Overview  --  State: " (str (w :state)))
+  (.log js/console " Activists: " (w :activists) "  Money: " (w :money))
+  (.log js/console " Operations:" (str/join ", " (map :id (w :operations))))
+  (.log js/console " Boons:" (str/join ", " (w :boons))))
