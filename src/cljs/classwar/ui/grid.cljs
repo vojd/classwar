@@ -16,7 +16,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.ui.grid
-  (:require [classwar.state :as state]))
+  (:require [classwar.world :as world]))
 
 (defn rgb-str [v]
   (let [fascists-rgb (int (* 255 (:fascists v)))]
@@ -28,7 +28,7 @@
         cell-size (:cell-size state)]
     (doseq [x w
             y h]
-      (let [val (state/get-cell state x y)]
+      (let [val (world/get-cell state x y)]
         (set! (. ctx -fillStyle) (rgb-str val))
         (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
   state)
