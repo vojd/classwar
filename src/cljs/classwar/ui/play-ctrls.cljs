@@ -44,19 +44,17 @@
   (reify
     om/IRender
     (render [this]
-      (let [{cmd-chan :cmd-chan} data
-            {:keys [caption ctrl-op]} (play-ctrl data)]
+      (let [{:keys [caption ctrl-op]} (play-ctrl data)]
         (dom/button
-         #js { :onClick (partial ctrl-op cmd-chan) }
+         #js { :onClick (partial ctrl-op engine/cmd-chan) }
          caption)))))
-
 
  (defn start-antifa-campaign-ctrl [data owner]
     (reify
       om/IRender
       (render [this]
         (dom/button
-         #js {:onClick (partial send-start-antifa-op! (:cmd-chan @engine/game) 0 0)}
+         #js {:onClick (partial send-start-antifa-op! engine/cmd-chan 0 0)}
          "Start antifa campaign"))))
 
 (om/root day-label-view engine/game

@@ -100,8 +100,15 @@
         collect-boon-fns (map (fn [b] (partial collect-boon b)) boons)]
     ((apply comp collect-boon-fns) world)))
 
+(defn pprint-world [w]
+  (.log js/console "Time " (w :time) "  --  Game Overview  --  State: " (str (w :state)))
+  (.log js/console " Activists: " (w :activists) "  Money: " (w :money))
+  (.log js/console " Operations:" (str/join ", " (map :id (w :operations))))
+  (.log js/console " Boons:" (str/join ", " (w :boons))))
+
 (defn tic [world]
   "Advance the world state one tic - run the world logic"
+  (pprint-world world)
   (if (= (:state world) :running)
     (-> world
         (execute-operations)
@@ -138,9 +145,3 @@
         (update-in [:operations] conj new-op))))
 
 (def ACTIVIST_DAILY_DONATION 5)
-
-(defn pprint-world [w]
-  (.log js/console "Time " (w :time) "  --  Game Overview  --  State: " (str (w :state)))
-  (.log js/console " Activists: " (w :activists) "  Money: " (w :money))
-  (.log js/console " Operations:" (str/join ", " (map :id (w :operations))))
-  (.log js/console " Boons:" (str/join ", " (w :boons))))

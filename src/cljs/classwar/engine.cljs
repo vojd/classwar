@@ -19,26 +19,19 @@
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
                [classwar.world :as world])
-
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(defn now [] (.getTime (js/Date.)))
-
-(defn- update-game [game]
-  (world/pprint-world game)
-  (world/tic game))
-
-(defn- send-tick! [cmd-chan]
-  (async/put! cmd-chan {:msg-id :tick}))
+(def cmd-chan (async/chan))
+(def game (atom (world/create-world-state)))
 
 (defn start-ticker [cmd-chan period]
   (go (while true
-        (send-tick! cmd-chan)
+        (async/put! cmd-chan {:msg-id :tick})
         (<! (async/timeout period)))))
 
 (defmulti process-cmd :msg-id)
 (defmethod process-cmd :tick [cmd game]
-  (update-game game))
+  (world/tic game))
 
 (defmethod process-cmd :start-game [cmd game]
   (world/start game))
@@ -55,22 +48,15 @@
   (let [{[x y] :pos} cmd]
     (world/collect-boons game x y)))
 
-(defn incomming-cmd [cmd game]
+(defn handle-incomming-cmd [cmd game]
   (swap! game #(process-cmd cmd %))
   game)
 
-(defn create-game-state [cmd-chan]
-  (merge {:cmd-chan cmd-chan}
-         (world/create-world-state)))
-
-(def cmd-chan (async/chan))
-(def game (atom (create-game-state cmd-chan)))
-
-(defn start-game [game render-fn]
+(defn start-game [game cmd-chan render-fn]
   (go
     (big-bang!
      :initial-state game
      :to-draw render-fn
-     :on-receive incomming-cmd
-     :receive-channel (:cmd-chan @game))
-    (start-ticker (:cmd-chan @game) 1000)))
+     :on-receive handle-incomming-cmd
+     :receive-channel cmd-chan)
+    (start-ticker cmd-chan 1000)))
