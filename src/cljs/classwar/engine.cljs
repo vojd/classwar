@@ -27,7 +27,7 @@
 (defn start-ticker [cmd-chan period]
   (go (while true
         (async/put! cmd-chan {:msg-id :tick})
-        (<! (async/timeout period)))))
+        (async/<! (async/timeout period)))))
 
 (defmulti process-cmd :msg-id)
 (defmethod process-cmd :tick [cmd game]
