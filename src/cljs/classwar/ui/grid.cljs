@@ -18,36 +18,84 @@
 (ns classwar.ui.grid
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [cljs.core.async :refer [<! put!]]
             [classwar.engine :as engine]
             [classwar.world :as world]))
+
 
 (defn rgb-str [v]
   (let [fascists-rgb (int (* 255 (:fascists v)))]
     (str "rgb(0, 0, " fascists-rgb ")")))
 
 (defn render-grid [ctx game]
+
   (let [w (vec (range (:width game)))
         h (vec (range (:height game)))
-        cell-size (:cell-size game)]
+        [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
+
+    (.log js/console "cell ssg " cell-size-x " " cell-size-y)
+
     (doseq [x w
             y h]
       (let [val (world/get-cell game x y)]
         (set! (. ctx -fillStyle) (rgb-str val))
-        (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
+        (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
   game)
 
 (defn get-render-context [owner canvas-id]
   (let [canvas (om/get-node owner canvas-id)]
     (.getContext canvas "2d")))
 
-(defn get-cell [game x y]
-  (let [width (-> game :map :width)
-        idx (+ x (* y width))]
-    (nth (-> game :map :cells ) idx)))
+(defn get-cell-size [canvas w h]
+  (.log js/console "getcelelelel " canvas " w " w " h " h)
+  (let [canvas-width (.-width canvas)
+        canvas-height (.-height canvas)
+        grid-width w
+        grid-height h]
+    [(/ canvas-width grid-width)
+     (/ canvas-height grid-height)]))
 
+(defn get-cell [w h canvas [x y]]
+  (let [canvas-width (.-width canvas)
+        canvas-height (.-height canvas)
+        grid-width w
+        grid-height h
+        [cell-size-x cell-size-y] (get-cell-size canvas w h)
+        rx (/ x cell-size-x)
+        ry (/ y cell-size-y)]
+
+    (.log js/console "gw " grid-width " gh " grid-height)
+
+    [(.floor js/Math rx )
+     (.floor js/Math ry)]))
+
+(defn get-click-pos [click-event]
+  (let [canvas (aget click-event "target")
+        x (aget click-event "clientX")
+        y (aget click-event "clientY")
+        bounding-rect (.getBoundingClientRect canvas)]
+    [(- x (.-left bounding-rect))
+     (- y (.-top bounding-rect))]))
+
+
+(defn send-start-antifa-op! [cmd-chan x y]
+  ;; This is just for debugging - should be hooked up to ui
+  (put! cmd-chan {:msg-id :start-op
+                        :op world/antifa-flyers
+                        :pos [x y]}))
+
+(defn canvas-on-click [w h click-event]
+  (.log js/console "canvas on click " w " h " h)
+  (let [pos (get-click-pos click-event)
+        canvas (aget click-event "target")
+        [x y] (get-cell w h canvas pos)]
+    (send-start-antifa-op! engine/cmd-chan x y)))
 
 (defn canvas-view [game owner]
   (reify
+    om/IInitState
+    (init-state [_]
+      {:game game})
     om/IWillMount
     (will-mount [this]
       (.log js/console "in willmount"))
@@ -64,9 +112,15 @@
         (render-grid ctx game)))
 
     om/IRenderState
-    (render-state [this _]
-      (.log js/console "in renderstate")
-      (dom/canvas #js { :width 640 :height 640 :ref "game-canvas" } nil))))
+    (render-state [this state]
+      (dom/canvas #js {
+                      ;;:width (* (:cell-size game) (:width game))
+                       ;;:height (* (:cell-size game) (:height game))
+                       :width 640
+                       :height 640
+                       :ref "game-canvas"
+                       :onClick (partial canvas-on-click (:width game) (:height game))
+                       } nil))))
 
 (om/root canvas-view engine/game
          {:target (. js/document (getElementById "canvas-wrapper"))})
