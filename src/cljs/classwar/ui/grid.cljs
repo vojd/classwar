@@ -36,8 +36,8 @@
         (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
   state)
 
-(defn get-render-context [canvas-id]
-  (let [canvas (.getElementById js/document canvas-id)]
+(defn get-render-context [owner canvas-id]
+  (let [canvas (om/get-node owner canvas-id)]
     (.getContext canvas "2d")))
 
 (defn get-cell [state x y]
@@ -51,14 +51,15 @@
     om/IWillMount
     (will-mount [this]
       (.log js/console "in willmount"))
+    om/IDidMount
+    (did-mount [_]
+      (.log js/console "in did-mount")
+      (let [ctx (get-render-context owner "game-canvas")]
+        (render-grid ctx game)))
     om/IRenderState
     (render-state [this _]
       (.log js/console "in renderstate")
-      (let [ctx (get-render-context "canvas")]
-        (render-grid ctx game))
-      ;; What should we return here?? Replace with div (in index.html)
-      (dom/canvas nil nil))))
-
+      (dom/canvas #js { :width 640 :height 640 :ref "game-canvas" } nil))))
 
 (om/root canvas-view engine/game
-         {:target (. js/document (getElementById "canvas"))})
+         {:target (. js/document (getElementById "canvas-wrapper"))})
