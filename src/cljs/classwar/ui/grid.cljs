@@ -28,12 +28,9 @@
     (str "rgb(0, 0, " fascists-rgb ")")))
 
 (defn render-grid [ctx game]
-
   (let [w (vec (range (:width game)))
         h (vec (range (:height game)))
         [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
-
-    (.log js/console "cell ssg " cell-size-x " " cell-size-y)
 
     (doseq [x w
             y h]
@@ -47,7 +44,6 @@
     (.getContext canvas "2d")))
 
 (defn get-cell-size [canvas w h]
-  (.log js/console "getcelelelel " canvas " w " w " h " h)
   (let [canvas-width (.-width canvas)
         canvas-height (.-height canvas)
         grid-width w
@@ -63,8 +59,6 @@
         [cell-size-x cell-size-y] (get-cell-size canvas w h)
         rx (/ x cell-size-x)
         ry (/ y cell-size-y)]
-
-    (.log js/console "gw " grid-width " gh " grid-height)
 
     [(.floor js/Math rx )
      (.floor js/Math ry)]))
@@ -85,7 +79,6 @@
                         :pos [x y]}))
 
 (defn canvas-on-click [w h click-event]
-  (.log js/console "canvas on click " w " h " h)
   (let [pos (get-click-pos click-event)
         canvas (aget click-event "target")
         [x y] (get-cell w h canvas pos)]
@@ -114,8 +107,6 @@
     om/IRenderState
     (render-state [this state]
       (dom/canvas #js {
-                      ;;:width (* (:cell-size game) (:width game))
-                       ;;:height (* (:cell-size game) (:height game))
                        :width 640
                        :height 640
                        :ref "game-canvas"

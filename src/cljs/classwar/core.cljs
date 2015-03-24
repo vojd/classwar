@@ -19,7 +19,8 @@
   (:require [cljs.core.async :as async]
             [classwar.engine :as engine]
             [classwar.ui.grid :as grid]
-            [classwar.ui.play-ctrls]))
+            [classwar.ui.play-ctrls]
+            [classwar.ui.stats]))
 
 (defn main []
   (.log js/console ">> Running main << ")
