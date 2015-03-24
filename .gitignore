@@ -8,7 +8,7 @@ pom.xml.asc
 .lein-repl-history
 .lein-plugins/
 .repl
-
+.idea/
 /lib/
 
 classes/
