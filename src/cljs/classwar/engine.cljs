@@ -52,11 +52,10 @@
   (swap! game #(process-cmd cmd %))
   game)
 
-(defn start-game [game cmd-chan render-fn]
+(defn start-game [game cmd-chan]
   (go
     (big-bang!
      :initial-state game
-     :to-draw render-fn
      :on-receive handle-incomming-cmd
      :receive-channel cmd-chan)
     (start-ticker cmd-chan 1000)))

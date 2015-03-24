@@ -16,7 +16,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.ui.grid
-  (:require [classwar.world :as world]))
+  (:require [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]
+            [classwar.engine :as engine]
+            [classwar.world :as world]))
 
 (defn rgb-str [v]
   (let [fascists-rgb (int (* 255 (:fascists v)))]
@@ -33,9 +36,6 @@
         (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
   state)
 
-(defn render [ctx game]
-  (render-grid ctx @game))
-
 (defn get-render-context [canvas-id]
   (let [canvas (.getElementById js/document canvas-id)]
     (.getContext canvas "2d")))
@@ -44,3 +44,21 @@
   (let [width (-> state :map :width)
         idx (+ x (* y width))]
     (nth (-> state :map :cells ) idx)))
+
+
+(defn canvas-view [game owner]
+  (reify
+    om/IWillMount
+    (will-mount [this]
+      (.log js/console "in willmount"))
+    om/IRenderState
+    (render-state [this _]
+      (.log js/console "in renderstate")
+      (let [ctx (get-render-context "canvas")]
+        (render-grid ctx game))
+      ;; What should we return here?? Replace with div (in index.html)
+      (dom/canvas nil nil))))
+
+
+(om/root canvas-view engine/game
+         {:target (. js/document (getElementById "canvas"))})

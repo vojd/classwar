@@ -23,5 +23,4 @@
 
 (defn main []
   (.log js/console ">> Running main << ")
-  (let [render-fn (partial grid/render (grid/get-render-context "canvas"))]
-    (engine/start-game engine/game engine/cmd-chan render-fn)))
+  (engine/start-game engine/game engine/cmd-chan))
