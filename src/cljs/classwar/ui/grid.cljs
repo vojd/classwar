@@ -25,25 +25,25 @@
   (let [fascists-rgb (int (* 255 (:fascists v)))]
     (str "rgb(0, 0, " fascists-rgb ")")))
 
-(defn render-grid [ctx state]
-  (let [w (vec (range (:width state)))
-        h (vec (range (:height state)))
-        cell-size (:cell-size state)]
+(defn render-grid [ctx game]
+  (let [w (vec (range (:width game)))
+        h (vec (range (:height game)))
+        cell-size (:cell-size game)]
     (doseq [x w
             y h]
-      (let [val (world/get-cell state x y)]
+      (let [val (world/get-cell game x y)]
         (set! (. ctx -fillStyle) (rgb-str val))
         (.fillRect ctx (* x cell-size) (* y cell-size) cell-size cell-size))))
-  state)
+  game)
 
 (defn get-render-context [owner canvas-id]
   (let [canvas (om/get-node owner canvas-id)]
     (.getContext canvas "2d")))
 
-(defn get-cell [state x y]
-  (let [width (-> state :map :width)
+(defn get-cell [game x y]
+  (let [width (-> game :map :width)
         idx (+ x (* y width))]
-    (nth (-> state :map :cells ) idx)))
+    (nth (-> game :map :cells ) idx)))
 
 
 (defn canvas-view [game owner]
@@ -56,6 +56,13 @@
       (.log js/console "in did-mount")
       (let [ctx (get-render-context owner "game-canvas")]
         (render-grid ctx game)))
+
+    om/IDidUpdate
+    (did-update [_ _ _]
+      (.log js/console "in did-update")
+      (let [ctx (get-render-context owner "game-canvas")]
+        (render-grid ctx game)))
+
     om/IRenderState
     (render-state [this _]
       (.log js/console "in renderstate")
