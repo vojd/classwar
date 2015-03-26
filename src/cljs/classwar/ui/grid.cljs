@@ -113,5 +113,6 @@
                        :onClick (partial canvas-on-click (:width game) (:height game))
                        } nil))))
 
-(om/root canvas-view engine/game
-         {:target (. js/document (getElementById "canvas-wrapper"))})
+(defn create-ui [game]
+  (om/root canvas-view game
+           {:target (. js/document (getElementById "canvas-wrapper"))}))
