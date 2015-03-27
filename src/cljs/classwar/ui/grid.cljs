@@ -27,18 +27,6 @@
   (let [fascists-rgb (int (* 255 (:fascists v)))]
     (str "rgb(0, 0, " fascists-rgb ")")))
 
-(defn render-grid [ctx game]
-  (let [w (vec (range (:width game)))
-        h (vec (range (:height game)))
-        [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
-
-    (doseq [x w
-            y h]
-      (let [val (world/get-cell game x y)]
-        (set! (. ctx -fillStyle) (rgb-str val))
-        (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
-  game)
-
 (defn get-render-context [owner canvas-id]
   (let [canvas (om/get-node owner canvas-id)]
     (.getContext canvas "2d")))
@@ -71,6 +59,18 @@
     [(- x (.-left bounding-rect))
      (- y (.-top bounding-rect))]))
 
+
+(defn render-grid [ctx game]
+  (let [w (vec (range (:width game)))
+        h (vec (range (:height game)))
+        [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
+
+    (doseq [x w
+            y h]
+      (let [val (world/get-cell game x y)]
+        (set! (. ctx -fillStyle) (rgb-str val))
+        (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
+  game)
 
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
@@ -113,5 +113,6 @@
                        :onClick (partial canvas-on-click (:width game) (:height game))
                        } nil))))
 
-(om/root canvas-view engine/game
-         {:target (. js/document (getElementById "canvas-wrapper"))})
+(defn create-ui [game]
+  (om/root canvas-view game
+           {:target (. js/document (getElementById "canvas-wrapper"))}))

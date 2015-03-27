@@ -6,12 +6,6 @@
             [classwar.engine :as engine]
             [classwar.world :as world]))
 
-(defn send-start-antifa-op! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (put! cmd-chan {:msg-id :start-op
-                        :op world/antifa-flyers
-                        :pos [x y]}))
-
 (defn send-collect-boon! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (put! cmd-chan {:msg-id :collect-boon
@@ -49,19 +43,9 @@
          #js { :onClick (partial ctrl-op engine/cmd-chan) }
          caption)))))
 
- (defn start-antifa-campaign-ctrl [data owner]
-    (reify
-      om/IRender
-      (render [this]
-        (dom/button
-         #js {:onClick (partial send-start-antifa-op! engine/cmd-chan 0 0)}
-         "Start antifa campaign"))))
+(defn create-ui [game]
+  (om/root day-label-view game
+           {:target (. js/document (getElementById "day-label"))})
 
-(om/root day-label-view engine/game
-         {:target (. js/document (getElementById "day-label"))})
-
-(om/root play-ctrls-view engine/game
-         {:target (. js/document (getElementById "play-ctrls"))})
-
-(om/root start-antifa-campaign-ctrl engine/game
-         {:target (. js/document (getElementById "start-antifa-campaign"))})
+  (om/root play-ctrls-view game
+           {:target (. js/document (getElementById "play-ctrls"))}))

@@ -28,5 +28,6 @@
                (stats-activists-view game)
                ))))
 
-(om/root stats-view engine/game
-         {:target (. js/document (getElementById "stats"))})
+(defn create-ui [game]
+  (om/root stats-view game
+           {:target (. js/document (getElementById "stats"))}))

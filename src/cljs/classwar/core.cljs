@@ -17,11 +17,17 @@
 
 (ns classwar.core
   (:require [cljs.core.async :as async]
+            [classwar.world :as world]
             [classwar.engine :as engine]
-            [classwar.ui.grid :as grid]
-            [classwar.ui.play-ctrls]
-            [classwar.ui.stats]))
+            [classwar.ui.grid :as ui-grid]
+            [classwar.ui.play-ctrls :as ui-ctrls]
+            [classwar.ui.stats :as ui-stats]))
+
+(def game (atom (world/create-world-state)))
 
 (defn main []
   (.log js/console ">> Running main << ")
-  (engine/start-game engine/game engine/cmd-chan))
+  (engine/start-game game engine/cmd-chan)
+  (ui-grid/create-ui game)
+  (ui-stats/create-ui game)
+  (ui-ctrls/create-ui game))

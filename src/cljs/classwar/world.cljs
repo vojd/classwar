@@ -20,7 +20,6 @@
 
 (def GRID_WIDTH 16)
 (def GRID_HEIGHT 16)
-(def CELL-SIZE 80)
 
 (defn- initial-cell-state []
   {:fascists (rand)})
@@ -31,7 +30,6 @@
             :state                   :new  ;; :new :running :paused :game-over
             :width GRID_WIDTH
             :height GRID_HEIGHT
-            :cell-size CELL-SIZE
 
             :activists                  5  ;; Number of
             :money                    100  ;; $$
