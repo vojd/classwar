@@ -22,7 +22,6 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def cmd-chan (async/chan))
-(def game (atom (world/create-world-state)))
 
 (defn start-ticker [cmd-chan period]
   (go (while true
