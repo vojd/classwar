@@ -75,14 +75,15 @@
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (put! cmd-chan {:msg-id :start-op
-                        :op world/antifa-flyers
-                        :pos [x y]}))
+                  :op world/antifa-flyers
+                  :pos [x y]}))
 
-(defn canvas-on-click [w h click-event]
+(defn canvas-on-click [{w :width h :height :as game} click-event]
   (let [pos (get-click-pos click-event)
         canvas (aget click-event "target")
         [x y] (get-cell w h canvas pos)]
-    (send-start-antifa-op! engine/cmd-chan x y)))
+    (if (world/can-launch-operation game x y world/antifa-flyers)
+      (send-start-antifa-op! engine/cmd-chan x y))))
 
 (defn canvas-view [game owner]
   (reify
@@ -106,11 +107,10 @@
 
     om/IRenderState
     (render-state [this state]
-      (dom/canvas #js {
-                       :width 640
+      (dom/canvas #js {:width 640
                        :height 640
                        :ref "game-canvas"
-                       :onClick (partial canvas-on-click (:width game) (:height game))
+                       :onClick (fn [e] (canvas-on-click @game e))
                        } nil))))
 
 (defn create-ui [game]
