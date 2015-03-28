@@ -133,10 +133,15 @@
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
 
+(defn can-launch-operation [g x y op]
+  (and (>= (:activists g) (effort op))
+       (>= (:money g) (cost op))))
+
 (defn launch-operation [g x y op]
-  (let [new-op (merge op {
-                      :start (:time g)
-                      :pos [x y]})]
+  {:pre [(can-launch-operation g x y op)]}
+
+  (let [new-op (merge op {:start (:time g)
+                          :pos [x y]})]
     (-> g
         (update-in [:activists] - (effort op))
         (update-in [:money] - (cost op))
