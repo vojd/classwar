@@ -1,3 +1,15 @@
 h1 {
   text-decoration: underline;
 }
+
+.stats {
+    display: flex;
+}
+
+.stats-money {
+    box-shadow: 0 0 1px rgb(0, 0, 0, 0.5);
+}
+
+.stats-activists {
+    box-shadow: 0 0 1px rgb(0, 0, 0, 0.5);
+}
