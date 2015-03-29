@@ -135,6 +135,22 @@
           :recruitable 1
           :money 0})})
 
+(def antifa-demo {
+  :id :antifa-demo
+  :effort 10
+  :cost 100
+  :duration 5
+  :op (fn [{[x y] :pos :as op} world]
+        (let [idx (idx x y)
+              fascist-level-modifier-fn (fn [level] (max 0 (- level 0.2)))]
+          (update-in world [:grid idx :fascists] fascist-level-modifier-fn)))
+  :boon (fn [{pos :pos :as op} world] {
+          :created (:time world)
+          :pos pos
+          :recruitable 2
+          :money 0})})
+
+
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
 
