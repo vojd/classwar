@@ -21,6 +21,9 @@
 (def GRID_WIDTH 16)
 (def GRID_HEIGHT 16)
 
+(def BOON_DURATION 5)
+(def ACTIVIST_DAILY_DONATION 1)
+
 (defn- initial-cell-state []
   {:fascists (rand)})
 
@@ -77,8 +80,6 @@
         finish-op-fns (map (fn [op] (partial finish-n-reward op)) finishing-ops)]
     ((apply comp finish-op-fns) world)))
 
-(def BOON_DURATION 5)
-
 (defn- expired-boon? [time boon]
   (>= (- time (:created boon)) BOON_DURATION))
 
@@ -104,6 +105,9 @@
   (.log js/console " Operations:" (str/join ", " (map :id (w :operations))))
   (.log js/console " Boons:" (str/join ", " (w :boons))))
 
+(defn collect-money [world]
+  (update-in world [:money] + (* (:activists world) ACTIVIST_DAILY_DONATION)))
+
 (defn tic [world]
   "Advance the world state one tic - run the world logic"
   (pprint-world world)
@@ -112,6 +116,7 @@
         (execute-operations)
         (finish-operations)
         (expire-boons)
+        (collect-money)
         (update-in [:time] inc))
     world))
 
@@ -146,5 +151,3 @@
         (update-in [:activists] - (effort op))
         (update-in [:money] - (cost op))
         (update-in [:operations] conj new-op))))
-
-(def ACTIVIST_DAILY_DONATION 5)
