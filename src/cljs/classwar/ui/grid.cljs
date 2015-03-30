@@ -32,20 +32,18 @@
   (let [canvas (om/get-node owner canvas-id)]
     (.getContext canvas "2d")))
 
-(defn get-cell-size [canvas w h]
+(defn get-cell-size [canvas cols rows]
   (let [canvas-width (.-width canvas)
         canvas-height (.-height canvas)
-        grid-width w
-        grid-height h]
+        grid-width cols
+        grid-height rows]
     [(/ canvas-width grid-width)
      (/ canvas-height grid-height)]))
 
-(defn get-cell [w h canvas [x y]]
+(defn get-cell [cols rows canvas [x y]]
   (let [canvas-width (.-width canvas)
         canvas-height (.-height canvas)
-        grid-width w
-        grid-height h
-        [cell-size-x cell-size-y] (get-cell-size canvas w h)
+        [cell-size-x cell-size-y] (get-cell-size canvas cols rows)
         rx (/ x cell-size-x)
         ry (/ y cell-size-y)]
 
@@ -62,12 +60,12 @@
 
 
 (defn render-grid [ctx game]
-  (let [w (vec (range (:width game)))
-        h (vec (range (:height game)))
+  (let [row (vec (range (:width game)))
+        col (vec (range (:height game)))
         [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
 
-    (doseq [x w
-            y h]
+    (doseq [x row
+            y col]
       (let [val (world/get-cell game x y)]
         (set! (. ctx -fillStyle) (rgb-str val))
         (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
