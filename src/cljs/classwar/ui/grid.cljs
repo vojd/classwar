@@ -18,15 +18,25 @@
 (ns classwar.ui.grid
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! put!]]
+            [cljs.core.async :refer [<! chan put!]]
             [classwar.engine :as engine]
             [classwar.world :as world]
             [classwar.simulation :as sim]
-            [classwar.operations :as ops]))
+            [classwar.operations :as ops]
+            [classwar.ui.op-menu :as op-menu])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn rgb-str [v]
   (let [fascists-rgb (int (* 255 (:fascists v)))]
     (str "rgb(0, 0, " fascists-rgb ")")))
+
+(defn get-canvas-dim [owner canvas-id]
+  (let [canvas (om/get-node owner canvas-id)
+        bounding-rect (.getBoundingClientRect canvas)]
+    {:top (.-top bounding-rect)
+     :left (.-left bounding-rect)
+     :width (.-width bounding-rect)
+     :height (.-height bounding-rect)}))
 
 (defn get-render-context [owner canvas-id]
   (let [canvas (om/get-node owner canvas-id)]
@@ -71,46 +81,64 @@
         (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
   game)
 
-(defn send-start-antifa-op! [cmd-chan x y]
-  ;; This is just for debugging - should be hooked up to ui
-  (put! cmd-chan {:msg-id :start-op
-                  :op ops/antifa-flyers
-                  :pos [x y]}))
+(defn  canvas-on-click [{w :width h :height :as game} owner click-event]
+  "Toggle menu"
+  (if (om/get-state owner :menu)
+    (om/set-state! owner :menu nil)
 
-(defn canvas-on-click [{w :width h :height :as game} click-event]
-  (let [pos (get-click-pos click-event)
-        canvas (aget click-event "target")
-        [x y] (get-cell w h canvas pos)]
-    (if (sim/can-launch-operation game x y ops/antifa-flyers)
-      (send-start-antifa-op! engine/cmd-chan x y))))
+    (let [pos (get-click-pos click-event)
+          canvas (aget click-event "target")
+          [x y] (get-cell w h canvas pos)]
+      (om/set-state! owner :menu [x y]))))
+
+(defn- get-pos-from-cell [owner game [x y]]
+  (let [{:keys [top left width height]} (get-canvas-dim owner "game-canvas")]
+       [(+ top (* y (/ height (:height game))))
+        (+ left (* x (/ width (:width game))))]))
 
 (defn canvas-view [game owner]
   (reify
     om/IInitState
     (init-state [_]
-      {:game game})
+      {:menu nil
+       :launch (chan)})
+
     om/IWillMount
     (will-mount [this]
-      (.log js/console "in willmount"))
+      (let [launch (om/get-state owner :launch)]
+        ;; Listen for menu selections
+        (go (loop []
+              (let [op (<! launch)]
+                (put! engine/cmd-chan {:msg-id :start-op
+                                       :op op
+                                       :pos (om/get-state owner :menu)})
+                (om/set-state! owner :menu nil)
+                (recur))))))
+
     om/IDidMount
     (did-mount [_]
-      (.log js/console "in did-mount")
       (let [ctx (get-render-context owner "game-canvas")]
         (render-grid ctx game)))
 
     om/IDidUpdate
     (did-update [_ _ _]
-      (.log js/console "in did-update")
       (let [ctx (get-render-context owner "game-canvas")]
         (render-grid ctx game)))
 
     om/IRenderState
-    (render-state [this state]
-      (dom/canvas #js {:width 640
-                       :height 640
-                       :ref "game-canvas"
-                       :onClick (fn [e] (canvas-on-click @game e))
-                       } nil))))
+    (render-state [this {:keys [menu launch]}]
+      (dom/div nil
+               (dom/canvas #js {:width 640
+                                :height 640
+                                :ref "game-canvas"
+                                :onClick (fn [e] (canvas-on-click @game owner e))
+                                } nil)
+               (if menu
+                 (om/build op-menu/menu-view
+                           game
+                           {:init-state {:launch launch
+                                         :menu menu
+                                         :pos (get-pos-from-cell owner game menu)}}))))))
 
 (defn create-ui [game]
   (om/root canvas-view game
