@@ -150,6 +150,10 @@
           :recruitable 2
           :money 0})})
 
+(def all-ops #{antifa-flyers antifa-demo})
+
+(defn all-available-operations [g x y]
+  (filter (partial can-launch-operation g x y) all-ops))
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
