@@ -22,7 +22,8 @@
             [cljs.core.async :refer [<! put!]]
             [classwar.engine :as engine]
             [classwar.operations :as ops]
-            [classwar.world :as world]))
+            [classwar.world :as world]
+            [classwar.simulation :as sim]))
 
 (defmulti op-button-name :id)
 (defmethod op-button-name :antifa-flyers [op]
@@ -46,5 +47,7 @@
                                    :top x
                                    :left y}}
 
-         (om/build-all menu-option
-                       (map (fn [op] {:launch-chan launch :op op}) ops/all-ops)))))))
+         (let [[gridx gridy] menu
+               available-ops (sim/all-available-operations game gridx gridy)]
+           (om/build-all
+            menu-option (map (fn [op] {:launch-chan launch :op op}) available-ops))))))))

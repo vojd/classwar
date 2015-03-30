@@ -34,7 +34,7 @@
             :width GRID_WIDTH
             :height GRID_HEIGHT
 
-            :activists                  5  ;; Number of
+            :activists                 10  ;; Number of
             :money                    100  ;; $$
 
             :institutions             #{}  ;; Support groups and structures
