@@ -48,7 +48,7 @@
           :recruitable 2
           :money 0})})
 
-(def all-ops #{antifa-flyers antifa-demo})
+(def all-ops [antifa-flyers antifa-demo])
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
