@@ -24,15 +24,27 @@
             [classwar.operations :as ops]
             [classwar.world :as world]))
 
+(defmulti op-button-name :id)
+(defmethod op-button-name :antifa-flyers [op]
+  "Flyers")
+(defmethod op-button-name :antifa-demo [op]
+  "Demo")
+
+(defn menu-option [{:keys [launch-chan op]} owner]
+  (reify
+    om/IRender
+    (render [this]
+      (dom/button #js { :onClick #(put! launch-chan op)} (op-button-name op)))))
+
 (defn menu-view [game owner]
   (reify
     om/IRenderState
     (render-state [this {:keys [launch menu]}]
       (let [[x y] (om/get-state owner :pos)]
-        (dom/div #js { :style #js {:position "absolute"
+        (apply
+         dom/div #js { :style #js {:position "absolute"
                                    :top x
                                    :left y}}
-                 (dom/button #js { :onClick (fn [game event]
-                                              (put! launch ops/antifa-flyers))} "Flyers")
-                 (dom/button #js { :onClick (fn [game event]
-                                              (put! launch ops/antifa-demo))} "Demo"))))))
+
+         (om/build-all menu-option
+                       (map (fn [op] {:launch-chan launch :op op}) ops/all-ops)))))))
