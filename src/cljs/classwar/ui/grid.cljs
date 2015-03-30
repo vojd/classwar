@@ -20,8 +20,9 @@
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
             [classwar.engine :as engine]
-            [classwar.world :as world]))
-
+            [classwar.world :as world]
+            [classwar.simulation :as sim]
+            [classwar.operations :as ops]))
 
 (defn rgb-str [v]
   (let [fascists-rgb (int (* 255 (:fascists v)))]
@@ -75,14 +76,14 @@
 (defn send-start-antifa-op! [cmd-chan x y]
   ;; This is just for debugging - should be hooked up to ui
   (put! cmd-chan {:msg-id :start-op
-                  :op world/antifa-flyers
+                  :op ops/antifa-flyers
                   :pos [x y]}))
 
 (defn canvas-on-click [{w :width h :height :as game} click-event]
   (let [pos (get-click-pos click-event)
         canvas (aget click-event "target")
         [x y] (get-cell w h canvas pos)]
-    (if (world/can-launch-operation game x y world/antifa-flyers)
+    (if (sim/can-launch-operation game x y ops/antifa-flyers)
       (send-start-antifa-op! engine/cmd-chan x y))))
 
 (defn canvas-view [game owner]

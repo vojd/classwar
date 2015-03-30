@@ -18,6 +18,7 @@
 (ns classwar.core
   (:require [cljs.core.async :as async]
             [classwar.world :as world]
+            [classwar.simulation :as sim]
             [classwar.engine :as engine]
             [classwar.ui.grid :as ui-grid]
             [classwar.ui.play-ctrls :as ui-ctrls]

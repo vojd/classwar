@@ -18,6 +18,7 @@
 (ns classwar.engine
   (:require    [cljs.core.async :as async]
                [big-bang.core :refer [big-bang!]]
+               [classwar.simulation :as sim]
                [classwar.world :as world])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
@@ -30,22 +31,22 @@
 
 (defmulti process-cmd :msg-id)
 (defmethod process-cmd :tick [cmd game]
-  (world/tic game))
+  (sim/tic game))
 
 (defmethod process-cmd :start-game [cmd game]
-  (world/start game))
+  (sim/start game))
 (defmethod process-cmd :pause-game [cmd game]
-  (world/pause game))
+  (sim/pause game))
 (defmethod process-cmd :resume-game [cmd game]
-  (world/resume game))
+  (sim/resume game))
 
 (defmethod process-cmd :start-op [cmd game]
   (let [{[x y] :pos} cmd]
-    (world/launch-operation game x y (:op cmd))))
+    (sim/launch-operation game x y (:op cmd))))
 
 (defmethod process-cmd :collect-boon [cmd game]
   (let [{[x y] :pos} cmd]
-    (world/collect-boons game x y)))
+    (sim/collect-boons game x y)))
 
 (defn handle-incomming-cmd [cmd game]
   (swap! game #(process-cmd cmd %))
