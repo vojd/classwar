@@ -18,11 +18,9 @@
 (ns classwar.ui.grid
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! chan put!]]
-            [classwar.engine :as engine]
+            [cljs.core.async :refer [<! chan]]
             [classwar.world :as world]
             [classwar.simulation :as sim]
-            [classwar.operations :as ops]
             [classwar.ui.op-menu :as op-menu]
             [classwar.ui.boon :as boon-ui])
   (:require-macros [cljs.core.async.macros :refer [go]]))
@@ -109,10 +107,9 @@
       (let [launch (om/get-state owner :launch)]
         ;; Listen for menu selections
         (go (loop []
-              (let [op (<! launch)]
-                (put! engine/cmd-chan {:msg-id :start-op
-                                       :op op
-                                       :pos (om/get-state owner :menu)})
+              (let [op (<! launch)
+                    [x y] (om/get-state owner :menu)]
+                (om/transact! game #(sim/launch-operation % x y op))
                 (om/set-state! owner :menu nil)
                 (recur))))))
 

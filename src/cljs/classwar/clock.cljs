@@ -15,47 +15,13 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(ns classwar.engine
+(ns classwar.clock
   (:require    [cljs.core.async :as async]
-               [big-bang.core :refer [big-bang!]]
                [classwar.simulation :as sim]
                [classwar.world :as world])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def cmd-chan (async/chan))
-
-(defn start-ticker [cmd-chan period]
+(defn start-game-clock [game period]
   (go (while true
-        (async/put! cmd-chan {:msg-id :tick})
+        (swap! game sim/tic)
         (async/<! (async/timeout period)))))
-
-(defmulti process-cmd :msg-id)
-(defmethod process-cmd :tick [cmd game]
-  (sim/tic game))
-
-(defmethod process-cmd :start-game [cmd game]
-  (sim/start game))
-(defmethod process-cmd :pause-game [cmd game]
-  (sim/pause game))
-(defmethod process-cmd :resume-game [cmd game]
-  (sim/resume game))
-
-(defmethod process-cmd :start-op [cmd game]
-  (let [{[x y] :pos} cmd]
-    (sim/launch-operation game x y (:op cmd))))
-
-(defmethod process-cmd :collect-boon [cmd game]
-  (let [{[x y] :pos} cmd]
-    (sim/collect-boons game x y)))
-
-(defn handle-incomming-cmd [cmd game]
-  (swap! game #(process-cmd cmd %))
-  game)
-
-(defn start-game [game cmd-chan]
-  (go
-    (big-bang!
-     :initial-state game
-     :on-receive handle-incomming-cmd
-     :receive-channel cmd-chan)
-    (start-ticker cmd-chan 1000)))
