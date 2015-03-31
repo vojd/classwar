@@ -18,9 +18,6 @@
 (ns classwar.ui.boon
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! put!]]
-            [classwar.operations :as ops]
-            [classwar.world :as world]
             [classwar.simulation :as sim]))
 
 (defn collect-boon-clicked [game gx gy]

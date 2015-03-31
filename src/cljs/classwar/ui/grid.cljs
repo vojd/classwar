@@ -18,10 +18,9 @@
 (ns classwar.ui.grid
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! chan put!]]
+            [cljs.core.async :refer [<! chan]]
             [classwar.world :as world]
             [classwar.simulation :as sim]
-            [classwar.operations :as ops]
             [classwar.ui.op-menu :as op-menu]
             [classwar.ui.boon :as boon-ui])
   (:require-macros [cljs.core.async.macros :refer [go]]))

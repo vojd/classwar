@@ -16,12 +16,8 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.ui.play-ctrls
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! put!]]
-            [classwar.engine :as engine]
-            [classwar.world :as world]
             [classwar.simulation :as sim]))
 
 (defn day-label-view [data owner]

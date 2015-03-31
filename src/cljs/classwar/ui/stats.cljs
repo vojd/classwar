@@ -17,10 +17,7 @@
 
 (ns classwar.ui.stats
     (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! put!]]
-            [classwar.engine :as engine]
-            [classwar.world :as world]))
+              [om.dom :as dom :include-macros true]))
 
 (defn stats-money-view [game]
   (dom/div nil

@@ -19,10 +19,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [<! put!]]
-            [classwar.engine :as engine]
-            [classwar.operations :as ops]
-            [classwar.world :as world]
+            [cljs.core.async :refer [put!]]
             [classwar.simulation :as sim]))
 
 (defmulti op-button-name :id)

@@ -18,8 +18,7 @@
 (ns classwar.core
   (:require [cljs.core.async :as async]
             [classwar.world :as world]
-            [classwar.simulation :as sim]
-            [classwar.engine :as engine]
+            [classwar.clock :as clock]
             [classwar.ui.grid :as ui-grid]
             [classwar.ui.play-ctrls :as ui-ctrls]
             [classwar.ui.stats :as ui-stats]))
@@ -28,7 +27,7 @@
 
 (defn main []
   (.log js/console ">> Running main << ")
-  (engine/start-game game engine/cmd-chan)
+  (clock/start-game-clock game 1000)
   (ui-grid/create-ui game)
   (ui-stats/create-ui game)
   (ui-ctrls/create-ui game))
