@@ -24,10 +24,14 @@
             [classwar.world :as world]
             [classwar.simulation :as sim]))
 
+(defn send-collect-boon! [grid-pos]
+  (put! engine/cmd-chan {:msg-id :collect-boon
+                         :pos grid-pos}))
 
 (defn boon-view [grid-to-px-fn boon]
-  (let [[x y] (grid-to-px-fn (:pos boon))]
-    (dom/button #js {:onClick (.log js/console "Collect me booon")
+  (let [grid-pos (:pos boon)
+        [x y] (grid-to-px-fn grid-pos)]
+    (dom/button #js {:onClick #(send-collect-boon! grid-pos)
                      :style #js {:position "absolute"
                                  :top x
                                  :left y}}
