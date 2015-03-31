@@ -23,7 +23,8 @@
             [classwar.world :as world]
             [classwar.simulation :as sim]
             [classwar.operations :as ops]
-            [classwar.ui.op-menu :as op-menu])
+            [classwar.ui.op-menu :as op-menu]
+            [classwar.ui.boon :as boon-ui])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn rgb-str [v]
@@ -133,6 +134,8 @@
                                 :ref "game-canvas"
                                 :onClick (fn [e] (canvas-on-click @game owner e))
                                 } nil)
+               (om/build boon-ui/boons-view game
+                         {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
                (if menu
                  (om/build op-menu/menu-view
                            game
