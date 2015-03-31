@@ -19,19 +19,17 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! put!]]
-            [classwar.engine :as engine]
             [classwar.operations :as ops]
             [classwar.world :as world]
             [classwar.simulation :as sim]))
 
-(defn send-collect-boon! [grid-pos]
-  (put! engine/cmd-chan {:msg-id :collect-boon
-                         :pos grid-pos}))
+(defn collect-boon-clicked [game gx gy]
+  (om/transact! game #(sim/collect-boons % gx gy)))
 
-(defn boon-view [grid-to-px-fn boon]
-  (let [grid-pos (:pos boon)
+(defn boon-view [game grid-to-px-fn boon]
+  (let [[gx gy :as grid-pos] (:pos boon)
         [x y] (grid-to-px-fn grid-pos)]
-    (dom/button #js {:onClick #(send-collect-boon! grid-pos)
+    (dom/button #js {:onClick #(collect-boon-clicked game gx gy)
                      :style #js {:position "absolute"
                                  :top x
                                  :left y}}
@@ -41,4 +39,4 @@
 (defn boons-view [game owner]
   (reify om/IRenderState
     (render-state [this {:keys [grid-to-px-fn]}]
-      (apply dom/div nil (map (partial boon-view grid-to-px-fn) (:boons game))))))
+      (apply dom/div nil (map #(boon-view game grid-to-px-fn %) (:boons game))))))

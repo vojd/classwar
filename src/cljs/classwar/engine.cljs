@@ -33,10 +33,6 @@
 (defmethod process-cmd :tick [cmd game]
   (sim/tic game))
 
-(defmethod process-cmd :collect-boon [cmd game]
-  (let [{[x y] :pos} cmd]
-    (sim/collect-boons game x y)))
-
 (defn handle-incomming-cmd [cmd game]
   (swap! game #(process-cmd cmd %))
   game)
