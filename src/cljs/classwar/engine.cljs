@@ -33,10 +33,6 @@
 (defmethod process-cmd :tick [cmd game]
   (sim/tic game))
 
-(defmethod process-cmd :start-op [cmd game]
-  (let [{[x y] :pos} cmd]
-    (sim/launch-operation game x y (:op cmd))))
-
 (defmethod process-cmd :collect-boon [cmd game]
   (let [{[x y] :pos} cmd]
     (sim/collect-boons game x y)))

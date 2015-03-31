@@ -19,7 +19,6 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! chan put!]]
-            [classwar.engine :as engine]
             [classwar.world :as world]
             [classwar.simulation :as sim]
             [classwar.operations :as ops]
@@ -109,10 +108,9 @@
       (let [launch (om/get-state owner :launch)]
         ;; Listen for menu selections
         (go (loop []
-              (let [op (<! launch)]
-                (put! engine/cmd-chan {:msg-id :start-op
-                                       :op op
-                                       :pos (om/get-state owner :menu)})
+              (let [op (<! launch)
+                    [x y] (om/get-state owner :menu)]
+                (om/transact! game #(sim/launch-operation % x y op))
                 (om/set-state! owner :menu nil)
                 (recur))))))
 
