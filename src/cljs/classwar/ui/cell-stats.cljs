@@ -16,38 +16,15 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (ns classwar.ui.cell-stats
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [cljs.core.async :refer [put!]]
-            [classwar.simulation :as sim]))
+            [om.dom :as dom :include-macros true]))
 
-(defmulti op-button-name :id)
-(defmethod op-button-name :antifa-flyers [op]
-  "Flyers")
-(defmethod op-button-name :antifa-demo [op]
-  "Demo")
-
-(defn menu-option [{:keys [launch-chan op]} owner]
-  (reify
-    om/IRender
-    (render [this]
-      (dom/div #js {:onClick #(put! launch-chan op)
-                    :className "menu-option"}
-               (dom/div #js {:className "menu-option-icon"}
-                        (dom/img #js {:src "img/activist.svg"}))
-               (dom/div #js {:className "menu-option-content"}
-                        (op-button-name op))))))
+(defn cell-stats [cell]
+  (.log js/console (str "Cell " cell))
+  (dom/div (dom/p "FUBAR")))
 
 (defn cell-stats-view [game owner]
   (reify
     om/IRenderState
-    (render-state [this]
-      (let [[x y] (om/get-state owner :pos)]
-        (apply
-         dom/div #js { :className }
-
-         (let [[gridx gridy] menu
-               available-ops (sim/all-available-operations game gridx gridy)]
-           (om/build-all
-            menu-option (map (fn [op] {:launch-chan launch :op op}) available-ops))))))))
+    (render-state [this {:keys [cell]}]
+      (dom/div #js { :className "cell-stats" } (cell-stats cell)))))

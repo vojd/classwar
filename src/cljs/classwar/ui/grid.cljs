@@ -22,6 +22,7 @@
             [classwar.world :as world]
             [classwar.simulation :as sim]
             [classwar.ui.op-menu :as op-menu]
+            [classwar.ui.cell-stats :as cell-stats]
             [classwar.ui.boon :as boon-ui]
             [classwar.ui.op-overlay :as op-overlay-ui]
             )
@@ -135,7 +136,7 @@
         (render-grid ctx game owner)))
 
     om/IRenderState
-    (render-state [this {:keys [menu launch]}]
+    (render-state [this {:keys [menu launch active-cell]}]
       (dom/div nil
                (dom/canvas #js {:width 640
                                 :height 640
@@ -146,6 +147,10 @@
                          {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
                (om/build op-overlay-ui/operations-view game
                          {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
+
+               (if-let active-cell [[x y] active-cell]
+                       (om/build cell-stats/cell-stats-view game
+                                 {:init-state {:cell (world/get-cell game x y)}}))
 
                (if menu
                  (om/build op-menu/menu-view
