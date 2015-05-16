@@ -35,10 +35,10 @@ h1 {
 }
 
 .cell-stats {
-   position "absolute"
-   :top 600px;
-   :left 0;
-   :border "1px solid #303030"
-   :width "80%"
-   :height "200px"
+    position: "absolute";
+   top: 600px;
+   left: 0;
+   border: "1px solid #303030";
+   width: "80%";
+   height: "200px";
 }
