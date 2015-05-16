@@ -30,7 +30,6 @@ h1 {
     background: #fff;
 }
 .operation-overlay-progress-bar-overlay {
-    width: 50%; /* dynamic */
     height: 12px;
     background: #0f0;
 }
