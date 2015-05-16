@@ -22,7 +22,9 @@
             [classwar.world :as world]
             [classwar.simulation :as sim]
             [classwar.ui.op-menu :as op-menu]
-            [classwar.ui.boon :as boon-ui])
+            [classwar.ui.boon :as boon-ui]
+            [classwar.ui.op-overlay :as op-overlay-ui]
+            )
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn rgb-str [v]
@@ -142,6 +144,9 @@
                                 } nil)
                (om/build boon-ui/boons-view game
                          {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
+               (om/build op-overlay-ui/operations-view game
+                         {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
+
                (if menu
                  (om/build op-menu/menu-view
                            game
