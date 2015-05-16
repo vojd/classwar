@@ -69,7 +69,7 @@
 
 (defn tic [world]
   "Advance the world state one tic - run the world logic"
-  (world/pprint-world world)
+  ;;(world/pprint-world world)
   (if (= (:state world) :running)
     (-> world
         (execute-operations)

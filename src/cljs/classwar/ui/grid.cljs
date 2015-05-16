@@ -68,7 +68,7 @@
      (- y (.-top bounding-rect))]))
 
 
-(defn render-grid [ctx game]
+(defn render-grid [ctx game owner]
   (let [row (vec (range (:width game)))
         col (vec (range (:height game)))
         [cell-size-x cell-size-y] (get-cell-size (.-canvas ctx) (:width game) (:height game))]
@@ -76,19 +76,27 @@
     (doseq [x row
             y col]
       (let [val (world/get-cell game x y)]
+
         (set! (. ctx -fillStyle) (rgb-str val))
-        (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y))))
+        (.fillRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y)
+        (if (= [x y] (om/get-state owner :active-cell))
+          (do
+            (set! (. ctx -strokeStyle) "#0f0")
+            (.strokeRect ctx (* x cell-size-x) (* y cell-size-y) cell-size-x cell-size-y)))
+
+)))
   game)
 
-(defn  canvas-on-click [{w :width h :height :as game} owner click-event]
-  "Toggle menu"
-  (if (om/get-state owner :menu)
-    (om/set-state! owner :menu nil)
+(defn canvas-on-click [{w :width h :height :as game} owner click-event]
+  "Toggle active cell"
+  (let [pos (get-click-pos click-event)
+        canvas (aget click-event "target")
+        [x y] (get-cell w h canvas pos)]
 
-    (let [pos (get-click-pos click-event)
-          canvas (aget click-event "target")
-          [x y] (get-cell w h canvas pos)]
-      (om/set-state! owner :menu [x y]))))
+    (if (= (om/get-state owner :active-cell) [x y])
+      (om/set-state! owner :active-cell nil)
+      (om/set-state! owner :active-cell [x y]))
+    (om/set-state! owner :menu (om/get-state owner :active-cell))))
 
 (defn- get-pos-from-cell [owner game [x y]]
   (let [{:keys [top left width height]} (get-canvas-dim owner "game-canvas")]
@@ -100,6 +108,7 @@
     om/IInitState
     (init-state [_]
       {:menu nil
+       :active-cell nil
        :launch (chan)})
 
     om/IWillMount
@@ -116,12 +125,12 @@
     om/IDidMount
     (did-mount [_]
       (let [ctx (get-render-context owner "game-canvas")]
-        (render-grid ctx game)))
+        (render-grid ctx game owner)))
 
     om/IDidUpdate
     (did-update [_ _ _]
       (let [ctx (get-render-context owner "game-canvas")]
-        (render-grid ctx game)))
+        (render-grid ctx game owner)))
 
     om/IRenderState
     (render-state [this {:keys [menu launch]}]
