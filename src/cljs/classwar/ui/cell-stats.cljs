@@ -20,8 +20,9 @@
             [om.dom :as dom :include-macros true]))
 
 (defn cell-stats [cell]
-  (.log js/console (str "Cell " cell))
-  (dom/div (dom/p "FUBAR")))
+  (.log js/console (str "Cell " (:fascists cell)))
+  (dom/div nil
+   (dom/p nil (str "Fascists: " (:fascists cell)))))
 
 (defn cell-stats-view [game owner]
   (reify

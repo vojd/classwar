@@ -94,12 +94,14 @@
   "Toggle active cell"
   (let [pos (get-click-pos click-event)
         canvas (aget click-event "target")
-        [x y] (get-cell w h canvas pos)]
+        [x y] (get-cell w h canvas pos)
+        active-cell (if (= (om/get-state owner :active-cell) [x y])
+                       nil
+                       [x y])]
+    (om/set-state! owner :active-cell active-cell)
 
-    (if (= (om/get-state owner :active-cell) [x y])
-      (om/set-state! owner :active-cell nil)
-      (om/set-state! owner :active-cell [x y]))
-    (om/set-state! owner :menu (om/get-state owner :active-cell))))
+    ;; truthy if we should show the menu or not
+    (om/set-state! owner :menu active-cell)))
 
 (defn- get-pos-from-cell [owner game [x y]]
   (let [{:keys [top left width height]} (get-canvas-dim owner "game-canvas")]
@@ -148,16 +150,15 @@
                (om/build op-overlay-ui/operations-view game
                          {:init-state {:grid-to-px-fn (partial get-pos-from-cell owner game)}})
 
-               (if-let active-cell [[x y] active-cell]
-                       (om/build cell-stats/cell-stats-view game
-                                 {:init-state {:cell (world/get-cell game x y)}}))
+               (if-let [[x y] active-cell]
+                 (om/build cell-stats/cell-stats-view game
+                           {:state {:cell (world/get-cell game x y)}}))
 
-               (if menu
-                 (om/build op-menu/menu-view
-                           game
-                           {:init-state {:launch launch
-                                         :menu menu
-                                         :pos [0 800]}}))))))
+               (if-let [[x y] active-cell]
+                 (om/build op-menu/menu-view game
+                               {:init-state {:launch launch
+                                             :pos [0 800]}
+                                :state {:active-cell [x y]}}))))))
 
 (defn create-ui [game]
   (om/root canvas-view game

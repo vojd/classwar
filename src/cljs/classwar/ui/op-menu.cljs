@@ -28,7 +28,7 @@
 (defmethod op-button-name :antifa-demo [op]
   "Demo")
 
-(defn menu-option [{:keys [launch-chan op]} owner]
+(defn menu-option [{:keys [launch-chan op active-cell]} owner]
   (reify
     om/IRender
     (render [this]
@@ -36,13 +36,14 @@
                     :className "menu-option"}
                (dom/div #js {:className "menu-option-icon"}
                         (dom/img #js {:src "img/activist.svg"}))
+
                (dom/div #js {:className "menu-option-content"}
                         (op-button-name op))))))
 
 (defn menu-view [game owner]
   (reify
     om/IRenderState
-    (render-state [this {:keys [launch menu]}]
+    (render-state [this {:keys [launch pos active-cell]}]
       (let [[x y] (om/get-state owner :pos)]
         (apply
          dom/div #js { :style #js {:position "absolute"
@@ -52,7 +53,9 @@
                                    :width "120px"
                                    :height "100%"}}
 
-         (let [[gridx gridy] menu
+         (let [[gridx gridy] active-cell
                available-ops (sim/all-available-operations game gridx gridy)]
            (om/build-all
-            menu-option (map (fn [op] {:launch-chan launch :op op}) available-ops))))))))
+            menu-option (map (fn [op] {:launch-chan launch
+                                      :op op
+                                      :active-cell active-cell}) available-ops))))))))
