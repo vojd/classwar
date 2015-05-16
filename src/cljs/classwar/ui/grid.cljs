@@ -147,7 +147,7 @@
                            game
                            {:init-state {:launch launch
                                          :menu menu
-                                         :pos (get-pos-from-cell owner game menu)}}))))))
+                                         :pos [0 800]}}))))))
 
 (defn create-ui [game]
   (om/root canvas-view game

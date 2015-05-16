@@ -32,7 +32,12 @@
   (reify
     om/IRender
     (render [this]
-      (dom/button #js { :onClick #(put! launch-chan op)} (op-button-name op)))))
+      (dom/div #js {:onClick #(put! launch-chan op)
+                    :className "menu-option"}
+               (dom/div #js {:className "menu-option-icon"}
+                        (dom/img #js {:src "img/activist.svg"}))
+               (dom/div #js {:className "menu-option-content"}
+                        (op-button-name op))))))
 
 (defn menu-view [game owner]
   (reify
@@ -42,7 +47,10 @@
         (apply
          dom/div #js { :style #js {:position "absolute"
                                    :top x
-                                   :left y}}
+                                   :left y
+                                   :border "1px solid #303030"
+                                   :width "120px"
+                                   :height "100%"}}
 
          (let [[gridx gridy] menu
                available-ops (sim/all-available-operations game gridx gridy)]
