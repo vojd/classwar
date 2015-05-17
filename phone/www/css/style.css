@@ -1,0 +1,41 @@
+h1 {
+  text-decoration: underline;
+}
+
+.menu-option {
+    color: "#fff";
+    width: 100%;
+    height: 80%;
+    margin-bottom: 8px;
+}
+
+.menu-option-icon {
+    float: left;
+    width: 32px;
+}
+
+
+/* A cell placed in the grid containing info about current operation
+*  Position is set programmatically
+*/
+.operation-overlay {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #303030;
+}
+.operation-overlay-progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #fff;
+}
+.operation-overlay-progress-bar-overlay {
+    height: 12px;
+    background: #0f0;
+}
+
+.cell-stats {
+    border: 1px solid #303030;
+    width: "80%";
+    height: "200px";
+}
