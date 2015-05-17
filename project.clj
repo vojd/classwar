@@ -35,7 +35,6 @@
                        :phone {:source-paths ["src/cljs", "phone/cljs"]
                                :compiler {:output-to     "phone/www/js/app.gen.js"
                                           :preamble      ["react/react.min.js"]
-                                          :externs       ["react/externs/react.js"]
                                           :optimizations :advanced
                                           :pretty-print  false}}}}
 
