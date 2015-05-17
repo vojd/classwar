@@ -1,8 +1,10 @@
+/target
+/classes
+/checkouts
 pom.xml
 pom.xml.asc
 *-init.clj
-
-*jar
+*.jar
 *.class
 .lein-deps-sum
 .lein-repl-history
@@ -18,3 +20,6 @@ resources/public/js/
 /checkouts
 /.lein-*
 /.nrepl-port
+/resources/public/js
+/out
+/.repl
