@@ -1,0 +1,16 @@
+{
+  "name": "classwar-resources",
+  "version": "0.0.1",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Classwar",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-less": "^3.0.3",
+    "run-sequence": "^1.1.0"
+  }
+}

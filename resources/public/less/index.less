@@ -1,0 +1,107 @@
+@blue: #0196a7;
+@brown: #5f4135;
+@red: #c62c37;
+@orange: #e95d39;
+@yellow: #ebc148;
+
+@black: #222;
+
+body {
+  margin: 0;
+  font-family: 'Andale Mono', sans-serif;
+  color: #fff;
+}
+
+#game-container {
+  width: 100vw;
+  height: 100vw;
+
+  margin: 0;
+  top: 0;
+  left: 0;
+
+  /* Game canvas */
+  #game-board {
+    width: 100vw;
+    height: 100vh;
+
+    background: #000;
+    background-image: url('../img/dark-map-inspiration.jpg');
+    -webkit-background-size: 100vw 100vh;
+    background-size: 100vw 100vh;
+  }
+
+  #player-stats{
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    .player-stats-content {
+      display: inline-flex;
+
+      .player-stats-item {
+        display: inline-flex;
+        width: 96px;
+        height: 46px;
+        background: @red;
+        margin-left: 24px;
+
+        box-shadow: 1px 1px 3px 2px @black;
+        border-radius: 50px;
+
+        p {
+          margin-left: 24px;
+        }
+      }
+    }
+  }
+
+  /** Statistics for a chosen grid cell */
+  .cell-stats {
+    position: absolute;
+    bottom: 0;
+    left: 50vh;
+    width: 420px;
+    height: 128px;
+
+    background: #303030;
+
+
+    &-columns {
+      display: flex;
+      height: 100%;
+    }
+    &-standing {
+      border: 1px solid #303030;
+      :first-child {
+        width: 128px;
+      }
+    }
+
+    /** coloring **/
+    &-resistance {
+      background: @red;
+    }
+    &-fascists {
+      background: @brown;
+    }
+    &-capitalists {
+      background: @blue;
+    }
+
+
+  }
+
+
+  /** Sidemenu **/
+  #operations-menu {
+    .menu-bar {
+      width: 120px;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #000;
+    }
+  }
+}

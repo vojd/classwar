@@ -1,16 +1,54 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link href="public/css/index.css" rel="stylesheet" type="text/css">
   </head>
   <body>
     <div id="app"></div>
-    <div id="stats"></div>
-    <div id="play-ctrls"></div>
-    <div id="day-label"></div>
-    <div id="start-antifa-campaign"></div>
 
-    <div id="canvas-wrapper"></div>
+    <div id="game-container">
+      <div id="game-board"></div>
+      <div id="player-stats">
+        <div class="player-stats-content">
+          <div class="player-stats-item"><p>$ 100</p></div>
+          <div class="player-stats-item"><p>A 5</p></div>
+        </div>
+      </div>
+      <div class="cell-stats">
+        <h4>Harbour district 1</h4>
+        <div class="cell-stats-columns">
+          <div class="cell-stats-standing cell-stats-resistance">
+            <div>Resistance</div>
+            <span>[x] [x] [o] [o]</span>
+          </div>
+          <div class="cell-stats-standing cell-stats-fascists">
+            <div>Fascists</div>
+            <span>[x] [x] [o] [o]</span>
+          </div>
+          <div class="cell-stats-standing cell-stats-capitalists">
+            <div>Capitalists</div>
+            <span>[x] [x] [o] [o]</span>
+          </div>
+        </div>
+      </div>
+      <div id="operations-menu">
+        <div class="menu-bar">
+          <div class="menu-item">
+            <div class="menu-item-icon">
+              <img src="public/img/activist.svg" />
+            </div>
+            <span>Flyers</span>
+            <span>(3)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="debug">
+      <div id="play-ctrls"></div>
+      <div id="day-label"></div>
+    </div>
+
     <script src="js/app.js" type="text/javascript"></script>
   </body>
 </html>

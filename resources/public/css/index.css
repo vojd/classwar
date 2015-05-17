@@ -1,0 +1,79 @@
+body {
+  margin: 0;
+  font-family: 'Andale Mono', sans-serif;
+  color: #fff;
+}
+#game-container {
+  width: 100vw;
+  height: 100vw;
+  margin: 0;
+  top: 0;
+  left: 0;
+  /* Game canvas */
+  /** Statistics for a chosen grid cell */
+  /** Sidemenu **/
+}
+#game-container #game-board {
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  background-image: url('../img/dark-map-inspiration.jpg');
+  -webkit-background-size: 100vw 100vh;
+  background-size: 100vw 100vh;
+}
+#game-container #player-stats {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#game-container #player-stats .player-stats-content {
+  display: inline-flex;
+}
+#game-container #player-stats .player-stats-content .player-stats-item {
+  display: inline-flex;
+  width: 96px;
+  height: 46px;
+  background: #c62c37;
+  margin-left: 24px;
+  box-shadow: 1px 1px 3px 2px #222222;
+  border-radius: 50px;
+}
+#game-container #player-stats .player-stats-content .player-stats-item p {
+  margin-left: 24px;
+}
+#game-container .cell-stats {
+  position: absolute;
+  bottom: 0;
+  left: 50vh;
+  width: 420px;
+  height: 128px;
+  background: #303030;
+  /** coloring **/
+}
+#game-container .cell-stats-columns {
+  display: flex;
+  height: 100%;
+}
+#game-container .cell-stats-standing {
+  border: 1px solid #303030;
+}
+#game-container .cell-stats-standing :first-child {
+  width: 128px;
+}
+#game-container .cell-stats-resistance {
+  background: #c62c37;
+}
+#game-container .cell-stats-fascists {
+  background: #5f4135;
+}
+#game-container .cell-stats-capitalists {
+  background: #0196a7;
+}
+#game-container #operations-menu .menu-bar {
+  width: 120px;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #000;
+}
