@@ -23,10 +23,12 @@
             [classwar.simulation :as sim]))
 
 (defmulti op-button-name :id)
-(defmethod op-button-name :antifa-flyers [op]
-  "Flyers")
-(defmethod op-button-name :antifa-demo [op]
-  "Demo")
+(defmethod op-button-name :antifa-flyers [op] "Flyers")
+(defmethod op-button-name :antifa-demo [op] "Demo")
+
+(defmulti op-button-icon :id)
+(defmethod op-button-icon :antifa-flyers [op] "img/flyers-icon.svg")
+(defmethod op-button-icon :antifa-demo [op] "img/demo-icon.svg")
 
 (defn menu-option [{:keys [launch-chan op active-cell]} owner]
   (reify
@@ -35,7 +37,7 @@
       (dom/div #js {:onClick #(put! launch-chan op)
                     :className "menu-option"}
                (dom/div #js {:className "menu-option-icon"}
-                        (dom/img #js {:src "img/activist.svg"}))
+                        (dom/img #js {:src (op-button-icon op)}))
 
                (dom/div #js {:className "menu-option-content"}
                         (op-button-name op))))))
