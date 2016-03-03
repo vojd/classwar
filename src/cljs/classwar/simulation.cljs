@@ -31,12 +31,18 @@
         op-fns (map bind-op (:operations world))]
     ((apply comp op-fns) world)))
 
-(defn- finish-n-reward [op world]
+(defmulti finish-n-reward :agent)
+
+(defmethod finish-n-reward :player [op world]
   (let [boon ((:boon op) op world)]
     (-> world
         (update-in [:activists] + (:effort op))
         (update-in [:operations] disj op)
         (update-in [:boons] conj boon))))
+
+(defmethod finish-n-reward :fascist [op world]
+  (-> world
+      (update-in [:operations] disj op)))
 
 (defn- finish-operations [world]
   (let [finished-op? (fn [time op] (>= (- time (:start op)) (:duration op)))
@@ -67,31 +73,39 @@
 (defn collect-money [world]
   (update-in world [:money] + (* (:activists world) world/ACTIVIST_DAILY_DONATION)))
 
+(defn launch-operation [g x y op]
+  (let [new-op (merge op {:start (:time g) :pos [x y]})]
+    (-> g (update-in [:operations] conj new-op))))
+
+(defn enqueue-opponent-operations [world]
+  (if (= (mod (:time world) 10) 0)
+    (launch-operation world 0 0 ops/fascist-flyers)
+    world))
+
 (defn tic [world]
   "Advance the world state one tic - run the world logic"
-  ;;(world/pprint-world world)
-  (if (= (:state world) :running)
-    (-> world
-        (execute-operations)
-        (finish-operations)
-        (expire-boons)
-        (collect-money)
-        (update-in [:time] inc))
-    world))
+  (do (world/pprint-world world)
+      (if (= (:state world) :running)
+        (-> world
+            (enqueue-opponent-operations)
+            (execute-operations)
+            (finish-operations)
+            (expire-boons)
+            (collect-money)
+            (update-in [:time] inc))
+        world)))
 
 (defn can-launch-operation [g x y op]
   (and (>= (:activists g) (ops/effort op))
        (>= (:money g) (ops/cost op))))
 
 (defn all-available-operations [g x y]
-  (filter (partial can-launch-operation g x y) ops/all-ops))
+  (filter (partial can-launch-operation g x y) (filter ops/player-op? ops/all-ops)))
 
-(defn launch-operation [g x y op]
+(defn launch-player-operation [g x y op]
   {:pre [(can-launch-operation g x y op)]}
+  (let [updated-game (launch-operation g x y op)]
 
-  (let [new-op (merge op {:start (:time g)
-                          :pos [x y]})]
-    (-> g
+    (-> updated-game
         (update-in [:activists] - (ops/effort op))
-        (update-in [:money] - (ops/cost op))
-        (update-in [:operations] conj new-op))))
+        (update-in [:money] - (ops/cost op)))))

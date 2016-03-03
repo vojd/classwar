@@ -123,7 +123,7 @@
         (go (loop []
               (let [op (<! launch)
                     [x y] (om/get-state owner :menu)]
-                (om/transact! game #(sim/launch-operation % x y op))
+                (om/transact! game #(sim/launch-player-operation % x y op))
                 (om/set-state! owner :menu nil)
                 (recur))))))
 

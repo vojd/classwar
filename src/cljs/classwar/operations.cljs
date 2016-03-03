@@ -20,6 +20,7 @@
 
 (def antifa-flyers {
   :id :antifa-flyers
+  :agent :player
   :effort 2
   :cost 20
   :duration 5
@@ -35,6 +36,7 @@
 
 (def antifa-demo {
   :id :antifa-demo
+  :agent :player
   :effort 10
   :cost 100
   :duration 5
@@ -48,7 +50,20 @@
           :recruitable 2
           :money 0})})
 
-(def all-ops [antifa-flyers antifa-demo])
+(def fascist-flyers {
+  :id :fascist-flyers
+  :agent :fascist
+  :duration 5
+  :op (fn [{[x y] :pos :as op} world]
+        (let [idx (world/idx x y)
+              fascist-level-modifier-fn (fn [level] (min 1 (+ level 0.1)))]
+          (update-in world [:grid idx :fascists] fascist-level-modifier-fn)))})
+
+
+(def all-ops [antifa-flyers antifa-demo fascist-flyers])
+
+(defn player-op? [op] (= (:agent op) :player))
+(defn fascist-op? [op] (= (:agent op) :fascist))
 
 (defn cost [op] (get op :cost 0))
 (defn effort [op] (get op :effort 0))
